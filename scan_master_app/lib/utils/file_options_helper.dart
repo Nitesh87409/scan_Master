@@ -6,6 +6,7 @@ import 'package:gal/gal.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 import '../services/file_manager_service.dart';
+import '../services/auth_service.dart';
 import '../core/animations.dart';
 import '../constants/app_strings.dart';
 import '../constants/document_filters.dart';
@@ -21,7 +22,10 @@ class FileOptionsHelper {
     Future<void> Function()? onRemoveFromFolder,
   }) async {
     final isPdf = file.path.toLowerCase().endsWith('.pdf');
+    final isPinned = await fileManager.isPinned(file.path);
     
+    if (!context.mounted) return;
+
     await AppAnimations.showPremiumBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -39,6 +43,15 @@ class FileOptionsHelper {
                     context,
                     MaterialPageRoute(builder: (context) => ViewerScreen(file: file)),
                   );
+                },
+              ),
+              ListTile(
+                leading: Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined, color: Colors.purple),
+                title: Text(isPinned ? 'Unpin' : 'Pin to Top'),
+                onTap: () async {
+                  Navigator.pop(bottomSheetContext);
+                  await fileManager.togglePin(file.path);
+                  onFileChanged();
                 },
               ),
               ListTile(
@@ -121,6 +134,23 @@ class FileOptionsHelper {
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   Share.shareXFiles([XFile(file.path)], text: 'Shared from Scan Master');
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.security, color: Colors.deepPurple),
+                title: const Text('Move to Vault'),
+                onTap: () async {
+                  Navigator.pop(bottomSheetContext);
+                  final authenticated = await AuthService.authenticate();
+                  if (authenticated) {
+                    await fileManager.moveToVault(file.path);
+                    onFileChanged();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Moved to Secure Vault')),
+                      );
+                    }
+                  }
                 },
               ),
               ListTile(

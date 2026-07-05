@@ -6,6 +6,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf_manipulator/pdf_manipulator.dart';
 import 'package:pdf_manipulator/io.dart';
+import 'package:printing/printing.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:archive/archive_io.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart' as sf;
 import 'viewer_screen.dart';
 import '../widgets/file_thumbnail.dart';
 import '../utils/file_options_helper.dart';
@@ -192,6 +196,227 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     }
   }
 
+  Future<void> _compressPdf() async {
+    if (_selectedFile == null) return;
+    
+    setState(() {
+      _isCancelled = false;
+      _isProcessing = true;
+      _progressMessage = AppStrings.compressPdf;
+    });
+    _startSimulatedProgress();
+    
+    final outputDir = await getApplicationDocumentsDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final compressedFilePath = '${outputDir.path}/scan_compressed_$timestamp.pdf';
+    
+    try {
+      final pdf = Pdf();
+      final outSink = await FileSink.create(File(compressedFilePath));
+      
+      final handle = await pdf.edit(FileSource(_selectedFile!));
+      await handle.optimizeImages(quality: 40, minSize: 100);
+      await handle.unembedStandardFonts();
+      
+      await handle.save(outSink);
+      await handle.dispose();
+      await outSink.close();
+      await pdf.dispose();
+      
+      if (_isCancelled) {
+        try {
+          if (await File(compressedFilePath).exists()) await File(compressedFilePath).delete();
+        } catch (_) {}
+        return;
+      }
+      
+      _finishTask('Compression Successful', filePath: compressedFilePath);
+    } catch (e) {
+      _finishTask('Compression Failed', error: e.toString());
+    }
+  }
+
+  Future<void> _exportToImages() async {
+    if (_selectedFile == null) return;
+    
+    setState(() {
+      _isCancelled = false;
+      _isProcessing = true;
+      _progressMessage = 'Exporting PDF to Images...';
+    });
+    _startSimulatedProgress();
+    
+    try {
+      final bytes = await File(_selectedFile!.path).readAsBytes();
+      final outputDir = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      
+      final folderPath = '${outputDir.path}/temp_images_$timestamp';
+      final dir = await Directory(folderPath).create(recursive: true);
+      
+      int pageIndex = 1;
+      await for (final page in Printing.raster(bytes, dpi: 150)) {
+        if (_isCancelled) return;
+        final imageFile = File('$folderPath/page_$pageIndex.png');
+        await imageFile.writeAsBytes(await page.toPng());
+        pageIndex++;
+      }
+      
+      // Zip the folder
+      final zipFilePath = '${outputDir.path}/scan_exported_images_$timestamp.zip';
+      var encoder = ZipFileEncoder();
+      encoder.create(zipFilePath);
+      encoder.addDirectory(dir);
+      encoder.close();
+      
+      // Cleanup folder
+      await dir.delete(recursive: true);
+      
+      _finishTask('Exported $pageIndex images to ZIP', filePath: zipFilePath);
+    } catch (e) {
+      _finishTask('Export Failed', error: e.toString());
+    }
+  }
+
+  Future<void> _exportToText() async {
+    if (_selectedFile == null) return;
+    
+    setState(() {
+      _isCancelled = false;
+      _isProcessing = true;
+      _progressMessage = 'Extracting Text (OCR)...';
+    });
+    _startSimulatedProgress();
+    
+    try {
+      final bytes = await File(_selectedFile!.path).readAsBytes();
+      final outputDir = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      
+      final textFilePath = '${outputDir.path}/scan_extracted_$timestamp.txt';
+      final textFile = File(textFilePath);
+      final sink = textFile.openWrite();
+      
+      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      
+      int pageIndex = 1;
+      await for (final page in Printing.raster(bytes, dpi: 150)) {
+        if (_isCancelled) {
+          textRecognizer.close();
+          await sink.close();
+          return;
+        }
+        
+        final tempImageFile = File('${outputDir.path}/temp_ocr_page_$pageIndex.png');
+        await tempImageFile.writeAsBytes(await page.toPng());
+        
+        final inputImage = InputImage.fromFile(tempImageFile);
+        final recognizedText = await textRecognizer.processImage(inputImage);
+        
+        sink.writeln('--- Page $pageIndex ---');
+        sink.writeln(recognizedText.text);
+        sink.writeln('');
+        
+        await tempImageFile.delete(); // cleanup
+        pageIndex++;
+      }
+      
+      textRecognizer.close();
+      await sink.close();
+      
+      _finishTask('Text Extracted Successfully', filePath: textFilePath);
+    } catch (e) {
+      _finishTask('Export Failed', error: e.toString());
+    }
+  }
+
+  Future<void> _watermarkPdf() async {
+    if (_selectedFile == null) return;
+    
+    final textController = TextEditingController();
+    final watermarkText = await AppAnimations.showPremiumDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(AppStrings.watermarkPdfTitle),
+        content: TextField(
+          controller: textController,
+          decoration: const InputDecoration(
+            hintText: 'Enter watermark text',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, textController.text), 
+            child: const Text('Add Watermark')
+          ),
+        ],
+      ),
+    );
+
+    if (watermarkText == null || watermarkText.trim().isEmpty) return;
+
+    setState(() {
+      _isCancelled = false;
+      _isProcessing = true;
+      _progressMessage = 'Adding Watermark...';
+    });
+    _startSimulatedProgress();
+
+    try {
+      final bytes = await File(_selectedFile!.path).readAsBytes();
+      final document = sf.PdfDocument(inputBytes: bytes);
+      
+      final font = sf.PdfStandardFont(sf.PdfFontFamily.helvetica, 60);
+      final brush = sf.PdfSolidBrush(sf.PdfColor(150, 150, 150));
+      
+      for (int i = 0; i < document.pages.count; i++) {
+        if (_isCancelled) {
+          document.dispose();
+          return;
+        }
+        final page = document.pages[i];
+        final graphics = page.graphics;
+        final pageSize = page.size;
+        
+        graphics.save();
+        graphics.setTransparency(0.25); // 25% opacity
+        graphics.translateTransform(pageSize.width / 2, pageSize.height / 2);
+        graphics.rotateTransform(-45);
+        
+        final format = sf.PdfStringFormat(
+          alignment: sf.PdfTextAlignment.center,
+          lineAlignment: sf.PdfVerticalAlignment.middle,
+          wordWrap: sf.PdfWordWrapType.word
+        );
+        final maxWidth = pageSize.width * 1.2;
+        
+        graphics.drawString(
+          watermarkText, 
+          font, 
+          brush: brush,
+          bounds: Rect.fromLTWH(-maxWidth / 2, -pageSize.height / 2, maxWidth, pageSize.height),
+          format: format
+        );
+        
+        graphics.restore();
+      }
+      
+      final outputBytes = await document.save();
+      document.dispose();
+      
+      final outputDir = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final outPath = '${outputDir.path}/scan_watermarked_$timestamp.pdf';
+      await File(outPath).writeAsBytes(outputBytes);
+      
+      _finishTask('Watermark added successfully', filePath: outPath);
+    } catch (e) {
+      _finishTask('Failed to add watermark', error: e.toString());
+    }
+  }
+
   Future<void> _protectPdf() async {
     if (_selectedFile == null) return;
     
@@ -351,16 +576,16 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: !_isMergeMode,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
         if (_isMergeMode) {
           setState(() {
             _isMergeMode = false;
             if (widget.initialFile == null) _selectedFile = null;
           });
-          return false; // Prevent popping the screen
         }
-        return true; // Allow normal back navigation
       },
       child: Scaffold(
         appBar: AppBar(
@@ -397,6 +622,34 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
                     ),
                     const SizedBox(height: 12),
                   ],
+                  ElevatedButton.icon(
+                    onPressed: _compressPdf,
+                    icon: const Icon(Icons.compress),
+                    label: const Text(AppStrings.compressPdf),
+                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: _exportToImages,
+                    icon: const Icon(Icons.image),
+                    label: const Text(AppStrings.exportImagesTitle),
+                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: _exportToText,
+                    icon: const Icon(Icons.text_snippet),
+                    label: const Text(AppStrings.exportTextTitle),
+                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: _watermarkPdf,
+                    icon: const Icon(Icons.branding_watermark),
+                    label: const Text(AppStrings.watermarkPdfTitle),
+                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+                  ),
+                  const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: _protectPdf,
                     icon: const Icon(Icons.lock),
@@ -453,6 +706,58 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
                           _mergeFile2 = null;
                           _isMergeMode = true;
                         });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildActionCard(
+                      icon: Icons.compress,
+                      title: AppStrings.compressPdfTitle,
+                      description: AppStrings.descCompressPdf,
+                      onTap: () async {
+                        await _pickFile(isFile2: false);
+                        if (_selectedFile != null) {
+                          await _compressPdf();
+                          if (mounted) setState(() => _selectedFile = null);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildActionCard(
+                      icon: Icons.image,
+                      title: AppStrings.exportImagesTitle,
+                      description: AppStrings.descExportImages,
+                      onTap: () async {
+                        await _pickFile(isFile2: false);
+                        if (_selectedFile != null) {
+                          await _exportToImages();
+                          if (mounted) setState(() => _selectedFile = null);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildActionCard(
+                      icon: Icons.text_snippet,
+                      title: AppStrings.exportTextTitle,
+                      description: AppStrings.descExportText,
+                      onTap: () async {
+                        await _pickFile(isFile2: false);
+                        if (_selectedFile != null) {
+                          await _exportToText();
+                          if (mounted) setState(() => _selectedFile = null);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildActionCard(
+                      icon: Icons.branding_watermark,
+                      title: AppStrings.watermarkPdfTitle,
+                      description: AppStrings.descWatermarkPdf,
+                      onTap: () async {
+                        await _pickFile(isFile2: false);
+                        if (_selectedFile != null) {
+                          await _watermarkPdf();
+                          if (mounted) setState(() => _selectedFile = null);
+                        }
                       },
                     ),
                   ],

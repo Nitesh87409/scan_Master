@@ -26,6 +26,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadVersion() async {
     final info = await PackageInfo.fromPlatform();
+    if (!mounted) return;
     setState(() {
       _version = '${info.version}+${info.buildNumber}';
     });
@@ -33,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
       _thumbnailSize = prefs.getString('thumbnail_size') ?? 'Small';
       _trashRetention = prefs.getInt('trash_retention_days') ?? 30;
@@ -44,6 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (size == null) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('thumbnail_size', size);
+    if (!mounted) return;
     setState(() {
       _thumbnailSize = size;
     });
@@ -53,6 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (days == null) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('trash_retention_days', days);
+    if (!mounted) return;
     setState(() {
       _trashRetention = days;
     });
@@ -62,6 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (modeIndex == null) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('theme_mode', modeIndex);
+    if (!mounted) return;
     setState(() {
       _themeMode = modeIndex;
     });

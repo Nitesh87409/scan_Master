@@ -19,7 +19,7 @@ class FilterScreen extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Image.file(File(imagePath), fit: BoxFit.contain),
+              child: Image.file(File(imagePath), fit: BoxFit.contain, cacheWidth: 2000),
             ),
           ),
           Container(

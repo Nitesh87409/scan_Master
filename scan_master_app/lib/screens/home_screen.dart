@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:gal/gal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:quick_actions/quick_actions.dart';
+import 'dart:async';
+import 'vault_screen.dart';
+import '../services/auth_service.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 import 'dart:typed_data';
 import '../constants/document_filters.dart';
@@ -40,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final FileManagerService _fileManager = FileManagerService();
   final ScannerService _scannerService = ScannerService();
   List<FileSystemEntity> _recentFiles = [];
+  List<String> _pinnedFiles = [];
   bool _isLoading = true;
   double _thumbnailSize = 80.0;
   FileFilterType _currentFilter = FileFilterType.all;
@@ -50,6 +55,23 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadFiles();
+    _setupQuickActions();
+  }
+
+  void _setupQuickActions() {
+    const QuickActions quickActions = QuickActions();
+    quickActions.initialize((String shortcutType) {
+      if (shortcutType == 'action_scan') {
+        _startScan(isGallery: false);
+      }
+    });
+
+    quickActions.setShortcutItems(<ShortcutItem>[
+      const ShortcutItem(
+        type: 'action_scan',
+        localizedTitle: 'Scan Document',
+      ),
+    ]);
   }
 
   Future<void> _loadFiles() async {
@@ -62,10 +84,12 @@ class _HomeScreenState extends State<HomeScreen> {
     else _thumbnailSize = 80.0;
 
     final newFiles = await _fileManager.getRecentFiles();
+    final pinned = await _fileManager.getPinnedFiles();
     
     if (mounted) {
       setState(() {
         _recentFiles = newFiles;
+        _pinnedFiles = pinned;
         _isLoading = false;
       });
     }
@@ -135,6 +159,11 @@ class _HomeScreenState extends State<HomeScreen> {
           title: const Text('Scan Master', style: TextStyle(fontWeight: FontWeight.bold)),
           actions: [
             IconButton(
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+              tooltip: 'Import from Gallery',
+              onPressed: () => _startScan(isGallery: true),
+            ),
+            IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: AppStrings.titleTrashBin,
               onPressed: () {
@@ -142,6 +171,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(builder: (context) => const TrashScreen()),
                 ).then((_) => _loadFiles());
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.security, color: Colors.deepPurple),
+              tooltip: 'Secure Vault',
+              onPressed: () async {
+                final authenticated = await AuthService.authenticate();
+                if (authenticated && mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const VaultScreen()),
+                  ).then((_) => _loadFiles());
+                }
               },
             ),
             IconButton(
@@ -182,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: _GlowingScanButton(
-        onPressed: () => _startScan(isGallery: true),
+        onPressed: () => _startScan(isGallery: false),
       ),
       floatingActionButtonLocation: const _FixedCenterDockedFabLocation(),
       bottomNavigationBar: BottomAppBar(
@@ -483,7 +525,25 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: const EdgeInsets.all(12.0),
                               child: Row(
                                 children: [
-                                  FileThumbnail(file: file, size: _thumbnailSize),
+                                  Stack(
+                                    children: [
+                                      FileThumbnail(file: file, size: _thumbnailSize),
+                                      if (_pinnedFiles.contains(file.path))
+                                        Positioned(
+                                          top: 0,
+                                          left: 0,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(2),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 2, offset: Offset(0, 1))]
+                                            ),
+                                            child: const Icon(Icons.push_pin, size: 12, color: Colors.purple),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Text(

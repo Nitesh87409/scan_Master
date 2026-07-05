@@ -1,21 +1,72 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 
-class FileThumbnail extends StatelessWidget {
+class _PdfRasterQueue {
+  static final List<Function> _queue = [];
+  static bool _isProcessing = false;
+
+  static Future<T> enqueue<T>(Future<T> Function() task) {
+    final completer = Completer<T>();
+    _queue.add(() async {
+      try {
+        completer.complete(await task());
+      } catch (e) {
+        completer.completeError(e);
+      }
+    });
+    _processNext();
+    return completer.future;
+  }
+
+  static void _processNext() async {
+    if (_isProcessing || _queue.isEmpty) return;
+    _isProcessing = true;
+    final task = _queue.removeAt(0);
+    await task();
+    _isProcessing = false;
+    _processNext();
+  }
+}
+
+class FileThumbnail extends StatefulWidget {
   final FileSystemEntity file;
   final double size;
 
   const FileThumbnail({super.key, required this.file, this.size = 50.0});
 
   @override
+  State<FileThumbnail> createState() => _FileThumbnailState();
+}
+
+class _FileThumbnailState extends State<FileThumbnail> {
+  late Future<Widget?> _thumbnailFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.file.path.toLowerCase().endsWith('.pdf')) {
+      _thumbnailFuture = _getOrGenerateThumbnailWidget();
+    }
+  }
+
+  @override
+  void didUpdateWidget(FileThumbnail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.file.path != widget.file.path && widget.file.path.toLowerCase().endsWith('.pdf')) {
+      _thumbnailFuture = _getOrGenerateThumbnailWidget();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isPdf = file.path.toLowerCase().endsWith('.pdf');
+    final isPdf = widget.file.path.toLowerCase().endsWith('.pdf');
 
     return Container(
-      width: size,
-      height: size,
+      width: widget.size,
+      height: widget.size,
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
@@ -26,13 +77,14 @@ class FileThumbnail extends StatelessWidget {
   }
 
   Widget _buildImageThumbnail() {
-    final extension = file.path.split('.').last.toUpperCase();
+    final extension = widget.file.path.split('.').last.toUpperCase();
     return Stack(
       fit: StackFit.expand,
       children: [
         Image.file(
-          File(file.path),
+          File(widget.file.path),
           fit: BoxFit.cover,
+          cacheWidth: 250,
           errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey),
         ),
         _buildBadge(extension == 'JPG' ? 'JPEG' : extension, Colors.blue),
@@ -74,7 +126,7 @@ class FileThumbnail extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         FutureBuilder<Widget?>(
-          future: _getOrGenerateThumbnailWidget(),
+          future: _thumbnailFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator(strokeWidth: 2));
@@ -101,25 +153,26 @@ class FileThumbnail extends StatelessWidget {
         await cacheDir.create();
       }
 
-      final cacheFile = File('${cacheDir.path}/${file.path.hashCode}.png');
+      final cacheFile = File('${cacheDir.path}/${widget.file.path.hashCode}.png');
       
       if (await cacheFile.exists()) {
-        return Image.file(cacheFile, fit: BoxFit.cover);
+        return Image.file(cacheFile, fit: BoxFit.cover, cacheWidth: 250);
       }
 
-      if (await _isPdfEncrypted(file.path)) {
+      if (await _isPdfEncrypted(widget.file.path)) {
         return const Center(
           child: Icon(Icons.lock, color: Colors.redAccent, size: 24),
         );
       }
 
-      final bytes = await File(file.path).readAsBytes();
-      final raster = await Printing.raster(bytes, pages: [0], dpi: 36).first;
-      final pngBytes = await raster.toPng();
-      
-      await cacheFile.writeAsBytes(pngBytes);
-      
-      return Image.memory(pngBytes, fit: BoxFit.cover);
+      return await _PdfRasterQueue.enqueue(() async {
+        final bytes = await File(widget.file.path).readAsBytes();
+        final raster = await Printing.raster(bytes, pages: [0], dpi: 36).first;
+        final pngBytes = await raster.toPng();
+        
+        await cacheFile.writeAsBytes(pngBytes);
+        return Image.memory(pngBytes, fit: BoxFit.cover, cacheWidth: 250);
+      });
     } catch (e) {
       return null;
     }

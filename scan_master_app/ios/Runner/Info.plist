@@ -66,5 +66,13 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Scan Master needs camera access to scan physical documents into PDFs.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Scan Master needs photo library access to import existing images for PDF creation.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Scan Master uses Face ID to secure your sensitive documents in the Vault.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Scan Master needs microphone access for the camera engine.</string>
 </dict>
 </plist>

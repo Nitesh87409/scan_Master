@@ -1,23 +1,91 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FileManagerService {
+  String _sanitizeName(String name) {
+    return name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '').replaceAll('..', '').trim();
+  }
+
+  Future<List<String>> getPinnedFiles() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('pinned_files') ?? [];
+  }
+
+  Future<Directory> getVaultFolder() async {
+    final rootDir = await getApplicationDocumentsDirectory();
+    final vaultDir = Directory('${rootDir.path}/.Vault');
+    if (!(await vaultDir.exists())) {
+      await vaultDir.create();
+    }
+    return vaultDir;
+  }
+
+  Future<void> togglePin(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> pinned = prefs.getStringList('pinned_files') ?? [];
+    if (pinned.contains(path)) {
+      pinned.remove(path);
+    } else {
+      pinned.add(path);
+    }
+    await prefs.setStringList('pinned_files', pinned);
+  }
+
+  Future<void> _updatePinnedPath(String oldPath, [String? newPath]) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> pinned = prefs.getStringList('pinned_files') ?? [];
+    if (pinned.contains(oldPath)) {
+      pinned.remove(oldPath);
+      if (newPath != null) {
+        pinned.add(newPath);
+      }
+      await prefs.setStringList('pinned_files', pinned);
+    }
+  }
+
+  Future<bool> isPinned(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> pinned = prefs.getStringList('pinned_files') ?? [];
+    return pinned.contains(path);
+  }
+  Future<List<FileSystemEntity>> _getSortedFilesAsync(Directory dir, {bool Function(FileSystemEntity)? filter, int? maxDays}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> pinnedPaths = prefs.getStringList('pinned_files') ?? [];
+
+    final List<FileSystemEntity> files = await dir.list().toList();
+    
+    final List<(FileSystemEntity, FileStat, bool)> filesWithStats = [];
+    await Future.wait(files.map((file) async {
+      if (filter != null && !filter(file)) return;
+      try {
+        final stat = await file.stat();
+        if (maxDays != null) {
+          final now = DateTime.now();
+          if (now.difference(stat.modified).inDays > maxDays) return;
+        }
+        final isPinned = pinnedPaths.contains(file.path);
+        filesWithStats.add((file, stat, isPinned));
+      } catch (e) {
+        // Skip files that can't be stat-ed
+      }
+    }));
+    
+    filesWithStats.sort((a, b) {
+      if (a.$3 && !b.$3) return -1;
+      if (!a.$3 && b.$3) return 1;
+      return b.$2.modified.compareTo(a.$2.modified);
+    });
+    return filesWithStats.map((f) => f.$1).toList();
+  }
+
   Future<List<FileSystemEntity>> getRecentFiles({int days = 7}) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      final List<FileSystemEntity> files = directory.listSync();
-      
-      final now = DateTime.now();
-      final validFiles = files.where((file) {
-        if (!(file.path.endsWith('.pdf') || file.path.endsWith('.jpg') || file.path.endsWith('.jpeg') || file.path.endsWith('.png'))) {
-          return false;
-        }
-        final stat = file.statSync();
-        return now.difference(stat.modified).inDays <= days;
-      }).toList();
-      
-      validFiles.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
-      return validFiles;
+      return await _getSortedFilesAsync(directory, filter: (file) {
+        final path = file.path.toLowerCase();
+        return path.endsWith('.pdf') || path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.png') || path.endsWith('.zip') || path.endsWith('.txt');
+      }, maxDays: days);
     } catch (e) {
       print('Error getting files: $e');
       return [];
@@ -27,14 +95,10 @@ class FileManagerService {
   Future<List<FileSystemEntity>> getRootFiles() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      final List<FileSystemEntity> files = directory.listSync();
-      
-      final validFiles = files.where((file) {
-        return file.path.endsWith('.pdf') || file.path.endsWith('.jpg') || file.path.endsWith('.jpeg') || file.path.endsWith('.png');
-      }).toList();
-      
-      validFiles.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
-      return validFiles;
+      return await _getSortedFilesAsync(directory, filter: (file) {
+        final path = file.path.toLowerCase();
+        return path.endsWith('.pdf') || path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.png') || path.endsWith('.zip') || path.endsWith('.txt');
+      });
     } catch (e) {
       print('Error getting files: $e');
       return [];
@@ -52,9 +116,27 @@ class FileManagerService {
         return;
       }
       await entity.delete(recursive: true);
+      await _updatePinnedPath(path, null);
     } catch (e) {
       print('Error deleting permanently: $e');
     }
+  }
+
+  Future<String> _getUniqueFilePath(String targetDir, String fileName) async {
+    String name = fileName;
+    String ext = '';
+    final lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex != -1 && lastDotIndex < fileName.length - 1 && !fileName.startsWith('TRASH_DIR')) {
+      name = fileName.substring(0, lastDotIndex);
+      ext = fileName.substring(lastDotIndex);
+    }
+    int counter = 1;
+    String newFileName = fileName;
+    while (await File('$targetDir/$newFileName').exists() || await Directory('$targetDir/$newFileName').exists()) {
+      newFileName = '$name ($counter)$ext';
+      counter++;
+    }
+    return '$targetDir/$newFileName';
   }
 
   Future<String?> moveToTrash(String filePath) async {
@@ -72,11 +154,30 @@ class FileManagerService {
 
         final fileName = file.path.split(Platform.pathSeparator).last;
         final trashFileName = 'TRASH__${locationPrefix}__$fileName';
-        final newFile = await file.rename('${trashDir.path}/$trashFileName');
+        final uniquePath = await _getUniqueFilePath(trashDir.path, trashFileName);
+        final newFile = await file.rename(uniquePath);
+        await _updatePinnedPath(filePath, null); // Remove pin when trashed
         return newFile.path;
       }
     } catch (e) {
       print('Error moving to trash: $e');
+    }
+    return null;
+  }
+
+  Future<String?> moveToVault(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        final vaultDir = await getVaultFolder();
+        final fileName = file.path.split(Platform.pathSeparator).last;
+        final uniquePath = await _getUniqueFilePath(vaultDir.path, fileName);
+        final newFile = await file.rename(uniquePath);
+        await _updatePinnedPath(filePath, null); // Remove pin when vaulted
+        return newFile.path;
+      }
+    } catch (e) {
+      print('Error moving to vault: $e');
     }
     return null;
   }
@@ -88,7 +189,8 @@ class FileManagerService {
         final trashDir = await getTrashFolder();
         final folderName = dir.path.split(Platform.pathSeparator).last;
         final trashFolderName = 'TRASH_DIR__ROOT__$folderName';
-        final newDir = await dir.rename('${trashDir.path}/$trashFolderName');
+        final uniquePath = await _getUniqueFilePath(trashDir.path, trashFolderName);
+        final newDir = await dir.rename(uniquePath);
         return newDir.path;
       }
     } catch (e) {
@@ -99,6 +201,8 @@ class FileManagerService {
 
   Future<String?> renameFile(String path, String newName) async {
     try {
+      newName = _sanitizeName(newName);
+      if (newName.isEmpty) return null;
       final file = File(path);
       if (await file.exists()) {
         final dir = file.parent.path;
@@ -115,6 +219,7 @@ class FileManagerService {
         }
         
         final newFile = await file.rename(newPath);
+        await _updatePinnedPath(path, newFile.path); // Update pin to new path
         return newFile.path;
       }
       return null;
@@ -148,6 +253,8 @@ class FileManagerService {
 
   Future<Directory?> createFolder(String folderName) async {
     try {
+      folderName = _sanitizeName(folderName);
+      if (folderName.isEmpty) return null;
       final directory = await getApplicationDocumentsDirectory();
       
       // Case-insensitive check
@@ -172,6 +279,8 @@ class FileManagerService {
 
   Future<Directory?> renameFolder(String folderPath, String newName) async {
     try {
+      newName = _sanitizeName(newName);
+      if (newName.isEmpty) return null;
       final folder = Directory(folderPath);
       if (await folder.exists()) {
         final parentDir = folder.parent;
@@ -200,12 +309,10 @@ class FileManagerService {
     try {
       final directory = Directory(folderPath);
       if (await directory.exists()) {
-        final List<FileSystemEntity> files = directory.listSync();
-        final validFiles = files.where((file) {
-          return file.path.endsWith('.pdf') || file.path.endsWith('.jpg') || file.path.endsWith('.jpeg') || file.path.endsWith('.png');
-        }).toList();
-        validFiles.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
-        return validFiles;
+        return await _getSortedFilesAsync(directory, filter: (file) {
+          final path = file.path.toLowerCase();
+          return path.endsWith('.pdf') || path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.png') || path.endsWith('.zip') || path.endsWith('.txt');
+        });
       }
       return [];
     } catch (e) {
@@ -219,7 +326,9 @@ class FileManagerService {
       final file = File(filePath);
       if (await file.exists()) {
         final fileName = file.path.split(Platform.pathSeparator).last;
-        await file.rename('$folderPath/$fileName');
+        final uniquePath = await _getUniqueFilePath(folderPath, fileName);
+        final newFile = await file.rename(uniquePath);
+        await _updatePinnedPath(filePath, newFile.path);
         return true;
       }
       return false;
@@ -235,7 +344,9 @@ class FileManagerService {
       if (await file.exists()) {
         final directory = await getApplicationDocumentsDirectory();
         final fileName = file.path.split(Platform.pathSeparator).last;
-        await file.rename('${directory.path}/$fileName');
+        final uniquePath = await _getUniqueFilePath(directory.path, fileName);
+        final newFile = await file.rename(uniquePath);
+        await _updatePinnedPath(filePath, newFile.path);
         return true;
       }
       return false;
@@ -259,11 +370,9 @@ class FileManagerService {
   Future<List<FileSystemEntity>> getTrashFiles() async {
     try {
       final trashFolder = await getTrashFolder();
-      final List<FileSystemEntity> files = trashFolder.listSync();
-      // Only include files and directories, but not the parent directory link if any
-      final validFiles = files.where((file) => file is File || file is Directory).toList();
-      validFiles.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
-      return validFiles;
+      return await _getSortedFilesAsync(trashFolder, filter: (file) {
+        return file is File || file is Directory;
+      });
     } catch (e) {
       print('Error getting trash files: $e');
       return [];

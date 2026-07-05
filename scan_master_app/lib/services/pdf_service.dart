@@ -34,23 +34,4 @@ class PdfService {
     }
   }
 
-  // TODO: Merge PDF
-  // Note: The base 'pdf' package does not support reading/parsing existing PDFs.
-  // We would need a package like 'pdf_merger' or 'syncfusion_flutter_pdf' to actually read and merge.
-  Future<String?> mergePdfs(List<String> pdfPaths, String outputName) async {
-    // Placeholder logic
-    return null; 
-  }
-
-  // TODO: Split PDF
-  Future<String?> splitPdf(String pdfPath, int pageToExtract, String outputName) async {
-    // Placeholder logic
-    return null;
-  }
-
-  // Compress PDF (For now, we can only compress images BEFORE creating PDF)
-  Future<String?> compressPdf(String pdfPath, String outputName) async {
-    // Placeholder logic
-    return null;
-  }
 }

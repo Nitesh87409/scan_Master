@@ -1,0 +1,109 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import '../services/file_manager_service.dart';
+import '../services/auth_service.dart';
+import '../widgets/file_thumbnail.dart';
+import '../utils/file_options_helper.dart';
+
+class VaultScreen extends StatefulWidget {
+  const VaultScreen({Key? key}) : super(key: key);
+
+  @override
+  State<VaultScreen> createState() => _VaultScreenState();
+}
+
+class _VaultScreenState extends State<VaultScreen> {
+  final FileManagerService _fileManager = FileManagerService();
+  List<FileSystemEntity> _vaultFiles = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVaultFiles();
+  }
+
+  Future<void> _loadVaultFiles() async {
+    setState(() => _isLoading = true);
+    final vaultDir = await _fileManager.getVaultFolder();
+    final files = vaultDir.listSync().where((f) => f is File).toList();
+    
+    files.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
+    
+    if (mounted) {
+      setState(() {
+        _vaultFiles = files;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _moveToNormal(FileSystemEntity file) async {
+    try {
+      final mainDir = await _fileManager.getFolders().then((f) => f.isEmpty ? null : f.first.parent);
+      if (mainDir == null) return;
+      
+      final fileName = file.path.split(Platform.pathSeparator).last;
+      final newPath = '${mainDir.path}/$fileName';
+      await (file as File).rename(newPath);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Restored from Vault')),
+      );
+      _loadVaultFiles();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to restore file')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Secure Vault'),
+        centerTitle: true,
+      ),
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : _vaultFiles.isEmpty 
+          ? const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.security, size: 80, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text('Vault is empty', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                ],
+              ),
+            )
+          : ListView.builder(
+              itemCount: _vaultFiles.length,
+              itemBuilder: (context, index) {
+                final file = _vaultFiles[index];
+                final fileName = file.path.split(Platform.pathSeparator).last;
+                return ListTile(
+                  leading: const Icon(Icons.lock, color: Colors.deepPurple),
+                  title: Text(fileName),
+                  subtitle: Text('Protected'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.restore),
+                    tooltip: 'Remove from Vault',
+                    onPressed: () => _moveToNormal(file),
+                  ),
+                  onTap: () {
+                    // Open the file options (but don't show move to vault since it's already in vault)
+                    FileOptionsHelper.showFileOptions(
+                      context: context, 
+                      file: file as File, 
+                      fileManager: _fileManager, 
+                      onFileChanged: _loadVaultFiles
+                    );
+                  },
+                );
+              },
+            ),
+    );
+  }
+}

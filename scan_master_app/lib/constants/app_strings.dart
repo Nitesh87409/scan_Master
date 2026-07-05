@@ -83,5 +83,15 @@ class AppStrings {
   static const String splittingPdf = 'Splitting PDF...';
   static const String mergingPdfs = 'Merging PDFs natively...';
   static const String protectPdfTitle = 'Protect PDF';
+  static const String compressPdf = 'Compress PDF';
+  static const String compressPdfTitle = 'Compress PDF';
+  static const String descCompressPdf = 'Reduce PDF file size for easier sharing';
   static const String addPassword = 'Add Password';
+  
+  static const String exportImagesTitle = 'Export to Images';
+  static const String descExportImages = 'Convert all PDF pages into JPEG/PNG images';
+  static const String exportTextTitle = 'Extract Text (TXT)';
+  static const String descExportText = 'Run OCR to extract all text from the PDF into a .txt file';
+  static const String watermarkPdfTitle = 'Add Watermark';
+  static const String descWatermarkPdf = 'Overlay custom text on all pages of the PDF';
 }

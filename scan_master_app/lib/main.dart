@@ -154,13 +154,19 @@ class _ScanMasterAppState extends State<ScanMasterApp> {
     _intentDataStreamSubscription = ReceiveSharingIntent.instance.getMediaStream().listen((List<SharedMediaFile> value) {
       if (value.isEmpty) return;
       for (final media in value) {
-        String path = media.path;
-        if (path.startsWith('file://')) {
-          path = Uri.parse(path).toFilePath();
+        try {
+          String path = media.path;
+          if (path.startsWith('file://')) {
+            path = Uri.parse(path).toFilePath();
+          }
+          if (File(path).existsSync()) {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(builder: (_) => ViewerScreen(file: File(path))),
+            );
+          }
+        } catch (e) {
+          debugPrint("Malformed intent path: $e");
         }
-        navigatorKey.currentState?.push(
-          MaterialPageRoute(builder: (_) => ViewerScreen(file: File(path))),
-        );
         break;
       }
     }, onError: (err) {
@@ -203,11 +209,17 @@ class _ScanMasterAppState extends State<ScanMasterApp> {
               // If intent has media, render ViewerScreen DIRECTLY (no HomeScreen flash)
               final media = snapshot.data;
               if (media != null && media.isNotEmpty) {
-                String path = media.first.path;
-                if (path.startsWith('file://')) {
-                  path = Uri.parse(path).toFilePath();
+                try {
+                  String path = media.first.path;
+                  if (path.startsWith('file://')) {
+                    path = Uri.parse(path).toFilePath();
+                  }
+                  if (File(path).existsSync()) {
+                    return ViewerScreen(file: File(path));
+                  }
+                } catch (e) {
+                  debugPrint("Malformed initial intent path: $e");
                 }
-                return ViewerScreen(file: File(path));
               }
               // No intent — show HomeScreen normally
               return const HomeScreen();

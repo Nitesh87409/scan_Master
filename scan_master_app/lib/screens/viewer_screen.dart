@@ -64,6 +64,15 @@ class _ViewerScreenState extends State<ViewerScreen> {
 
   Future<void> _handleMenuAction(String action) async {
     final file = File(widget.file.path);
+    if (!await file.exists()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File not found. It may have been deleted.')),
+        );
+        Navigator.pop(context);
+      }
+      return;
+    }
     
     switch (action) {
       case 'share':
@@ -134,6 +143,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
         canPop: false,
         onPopInvokedWithResult: (didPop, result) async {
           if (didPop) return;
+          if (_isPopping) return;
           if (mounted) {
             setState(() {
               _isPopping = true;
@@ -210,6 +220,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
                                 );
                               },
                               onViewerReady: (document, controller) {
+                                if (!mounted) return;
                                 setState(() {
                                   _totalPages = document.pages.length;
                                   _isReady = true;
@@ -217,6 +228,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
                               },
                               onPageChanged: (pageNumber) {
                                 if (pageNumber != null) {
+                                  if (!mounted) return;
                                   setState(() {
                                     _currentPage = pageNumber - 1; // 0-indexed in our UI
                                   });
@@ -234,7 +246,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
                         child: Center(
                           child: Container(
                             color: Colors.white,
-                            child: Image.file(File(widget.file.path)),
+                            child: Image.file(File(widget.file.path), cacheWidth: 2000),
                           ),
                         ),
                       ),

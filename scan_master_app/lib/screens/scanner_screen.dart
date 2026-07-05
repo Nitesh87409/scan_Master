@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'filter_screen.dart';
 
 class ScannerScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
   CameraController? _controller;
   List<CameraDescription> cameras = [];
   bool _isCameraInitialized = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -22,6 +24,15 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
   Future<void> _initCamera() async {
     try {
+      final status = await Permission.camera.request();
+      if (status.isDenied || status.isPermanentlyDenied) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = 'Camera permission is required to scan documents.\nPlease enable it in settings.';
+        });
+        return;
+      }
+
       cameras = await availableCameras();
       if (cameras.isNotEmpty) {
         _controller = CameraController(
@@ -34,9 +45,18 @@ class _ScannerScreenState extends State<ScannerScreen> {
         setState(() {
           _isCameraInitialized = true;
         });
+      } else {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = 'No camera found on this device.';
+        });
       }
     } catch (e) {
       debugPrint('Error initializing camera: $e');
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'Error initializing camera:\n$e';
+      });
     }
   }
 
@@ -64,10 +84,56 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isCameraInitialized || _controller == null) {
-      return const Scaffold(
+    if (_errorMessage != null) {
+      return Scaffold(
         backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          iconTheme: const IconThemeData(color: Colors.white),
+          elevation: 0,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.videocam_off, color: Colors.white54, size: 64),
+                const SizedBox(height: 16),
+                Text(
+                  _errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                const SizedBox(height: 24),
+                if (_errorMessage!.contains('permission'))
+                  ElevatedButton(
+                    onPressed: () => openAppSettings(),
+                    child: const Text('Open Settings'),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (!_isCameraInitialized || _controller == null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            const Center(child: CircularProgressIndicator(color: Colors.white)),
+            Positioned(
+              top: 50,
+              left: 16,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
       );
     }
 

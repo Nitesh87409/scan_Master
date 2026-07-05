@@ -2,6 +2,148 @@
 
 Ye file project ka detailed record rakhti hai. Har update, state change, aur event attachment yahan detail me log hoga.
 
+## [1.4.94+117] - 2026-07-05
+### Stability Fix: Intent Handling Fuzz-Proofing
+- **Validation Added:** Enclosed the `ReceiveSharingIntent` path parsing in `main.dart` with a `try-catch` block and added a strict `File(path).existsSync()` validation.
+- **Impact:** Prevents the app from crashing if a malformed, invalid, or non-existent file URI is sent via the Android "Open With" intent.
+
+
+## [1.4.93+116] - 2026-07-05
+### Security Fix: Path Traversal Vulnerability
+- **Sanitization Added:** Added `_sanitizeName()` helper in `FileManagerService` to strip slashes (`/`, `\`), relative paths (`..`), and other invalid filesystem characters.
+- **Impact:** Prevents malicious or accidental path traversal when a user renames a file/folder or creates a folder, ensuring the app remains securely sandboxed.
+
+
+## [1.4.92+115] - 2026-07-05
+### Bug Fix: iOS Critical Crash (Privacy Permissions)
+- **Info.plist Update:** Added mandatory iOS privacy permission strings (`NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`, `NSFaceIDUsageDescription`, and `NSMicrophoneUsageDescription`). 
+- **Impact:** Fixed a guaranteed SIGABRT crash when accessing camera or gallery on iOS, and prevented an automatic App Store rejection.
+
+
+## [1.4.91+114] - 2026-07-05
+### Feature Addition: Secure Vault (Biometric Lock)
+- **Dependency Added:** `local_auth` added.
+- **Android Setup:** Updated `AndroidManifest.xml` (USE_BIOMETRIC) and `MainActivity.kt` (FlutterFragmentActivity).
+- **Vault Logic:** Created `.Vault` hidden directory in `FileManagerService` with `moveToVault()` helper.
+- **Biometric Lock:** Implemented `AuthService` for FaceID/Fingerprint authentication. Added "Secure Vault" button in `HomeScreen` app bar and "Move to Vault" in `FileOptionsHelper`.
+- **UI Updates:** Added `VaultScreen` to view, unlock, and restore protected files.
+
+
+## [1.4.90+113] - 2026-07-05
+### Feature Addition: Watermark Tool
+- **Dependency Added:** Added `syncfusion_flutter_pdf` package for advanced PDF manipulation without quality loss.
+- **Watermark Logic:** Implemented `_watermarkPdf()` in `pdf_tools_screen.dart` which uses `PdfDocument` and `PdfGraphics` to draw a custom text string diagonally (rotated -45 degrees) with 25% opacity on every page.
+- **UI Updates:** Added 'Add Watermark' button in `PdfToolsScreen`.
+
+
+## [1.4.89+112] - 2026-07-05
+### Feature Addition: Export Formats (JPEG/PNG/TXT)
+- **Export to Images:** Added PDF rasterization using `Printing.raster()` to save all pages as `.png` files, which are then bundled into a `.zip` archive via `archive` package.
+- **Export to Text (OCR):** Added functionality to extract text from all PDF pages offline using `google_mlkit_text_recognition`, combining it into a single `.txt` file.
+- **File Manager Support:** Updated `FileManagerService` to include `.zip` and `.txt` extensions in `getRecentFiles`, `getRootFiles`, and `getFilesInFolder`.
+
+
+## [1.4.88+111] - 2026-07-05
+### Feature Addition: App Shortcuts (Quick Actions)
+- **Dependency Added:** Included `quick_actions` package for native Android/iOS shortcut integration.
+- **Home Screen Integration:** Initialized `QuickActions` inside `_HomeScreenState.initState()`.
+- **Scan Shortcut:** Configured `action_scan` shortcut which calls `_startScan(isGallery: false)`, allowing users to jump directly into the scanner by long-pressing the app icon.
+
+
+## [1.4.87+110] - 2026-07-05
+### Feature Addition: Favorites / Pin Documents
+- **Core Logic:** Modified `FileManagerService` to persist pinned document paths using `SharedPreferences`. The sort algorithm in `_getSortedFilesAsync` now guarantees pinned files always appear at the top.
+- **UI Logic:** Added a `Pin to Top` / `Unpin` toggle to the `file_options_helper.dart` bottom sheet menu.
+- **Visual Feedback:** Pinned files on the `HomeScreen` display a small purple `Icons.push_pin` badge overlaid on their thumbnail for easy visual distinction.
+
+
+## [1.4.86+109] - 2026-07-05
+### Feature Addition: PDF Compression
+- **Added Compress Option:** Implemented `_compressPdf` in `pdf_tools_screen.dart` which uses `pdf_manipulator`'s native `.optimizeImages(quality: 40, minSize: 100)` and `.unembedStandardFonts()` methods.
+- **UI Integration:** Added "Compress PDF" button to the PDF Tools screen and updated `AppStrings` accordingly. This allows users to easily shrink large scanner PDFs for email/WhatsApp sharing.
+
+
+## [1.4.85+108] - 2026-07-05
+### Core Feature Fix: UI Integration of Native Scanner
+- **Fixed Scanner Launch Logic:** In `home_screen.dart`, the main FAB scanner button was incorrectly hardcoded to `_startScan(isGallery: true)`, which bypassed the camera entirely and only allowed gallery import. This has been corrected to `isGallery: false`.
+- **Added Gallery Import Button:** Added a dedicated 'Import from Gallery' button to the `AppBar` actions in `home_screen.dart` so users can still import existing photos.
+- **Impact:** This single fix magically unlocks all the core scanner features natively provided by `google_mlkit_document_scanner` including **Auto edge detection, Perspective correction, Built-in image enhancement filters (B&W, grayscale, etc.), and Multi-page batch scanning**.
+
+
+## [1.4.84+107] - 2026-07-05
+### Concurrency Fix: PDF Rasterization Queue
+- **Added Execution Queue:** Implemented a custom `_PdfRasterQueue` in `file_thumbnail.dart` using a static `Completer` based queue. 
+- **Impact:** Prevents multiple heavy PDF rendering tasks (`Printing.raster`) from executing simultaneously when scrolling a grid of PDF files. By processing them sequentially, the app avoids massive CPU/RAM spikes and prevents native out-of-memory crashes that could occur with concurrent multi-megabyte PDF rasterization.
+
+
+## [1.4.83+106] - 2026-07-05
+### Performance Optimization: Image RAM Spikes
+- **Added cacheWidth to Images:** Set `cacheWidth: 250` for thumbnails in `file_thumbnail.dart` and `cacheWidth: 2000` for full-screen previews in `viewer_screen.dart` and `filter_screen.dart`.
+- **Impact:** Drastically reduces memory usage. Previously, high-res 12MP photos (4000x3000) were being decoded at full resolution just to be displayed as 50x50 UI thumbnails, using ~48MB of RAM per image. The app is now significantly faster and immune to Out-Of-Memory (OOM) crashes when scrolling image-heavy folders.
+
+
+## [1.4.82+105] - 2026-07-05
+### Memory Leak Fix: AnimationController Memory Exhaustion
+- **Proper Disposal:** Fixed a confirmed memory leak in `core/animations.dart` where the `AnimationController` passed to `showPremiumBottomSheet` was never being disposed by Flutter. It is now properly stored in a local variable and `.dispose()` is called inside the `.whenComplete()` of the Future.
+- **Impact:** Solves the RAM spike (and potential Out of Memory crashes) that would occur if the user repeatedly tapped the 3-dot menu or opened any custom bottom sheet across the app.
+
+
+## [1.4.81+104] - 2026-07-05
+### Automated Testing Fix: Main App Class Rename
+- **Fixed Widget Test:** Updated `widget_test.dart` where `MyApp` was still being referenced instead of the newly renamed `ScanMasterApp`. This fixes the compilation error during `flutter analyze` and `flutter test`.
+
+
+## [1.4.80+103] - 2026-07-05
+### Technical Debt Fix: Removed Dead Code in PdfService
+- **Code Cleanup:** Removed unused and empty placeholder functions (`mergePdfs`, `splitPdf`, `compressPdf`) from `pdf_service.dart`. Actual manipulation is already being handled cleanly via the `pdf_manipulator` package in `pdf_tools_screen.dart`.
+
+
+## [1.4.79+102] - 2026-07-05
+### Bug Fix: Rapid Back-Press Glitch in ViewerScreen
+- **Double Pop Prevented:** Added `if (_isPopping) return;` at the start of `onPopInvokedWithResult` in `viewer_screen.dart`. 
+- **Impact:** This prevents multiple rapid back-presses from queuing up overlapping delayed `.pop()` calls, ensuring that the app only pops exactly one screen, even if the user double-taps the back button very fast.
+
+
+## [1.4.78+101] - 2026-07-05
+### Technical Debt Fix: Deprecated WillPopScope
+- **API Upgrade:** Replaced the deprecated `WillPopScope` with Flutter's modern `PopScope` API in `pdf_tools_screen.dart`.
+- **Logic Updated:** Implemented `canPop: !_isMergeMode` and `onPopInvokedWithResult` to correctly handle the custom back navigation logic without relying on legacy Flutter APIs, ensuring future SDK compatibility.
+
+
+## [1.4.77+100] - 2026-07-05
+### Performance Fix: Heavy Memory Spikes on Thumbnail Rebuilds
+- **Stateful Caching:** Converted `FileThumbnail` from `StatelessWidget` to `StatefulWidget`. The `FutureBuilder` future (`_thumbnailFuture`) is now cached in `initState` and only updated in `didUpdateWidget` if the file path changes. 
+- **Impact:** This prevents the app from constantly hitting the disk (`cacheDir.exists()`) or memory (`file.readAsBytes()`) every time the user scrolls the list or a parent widget calls `setState()`, completely removing the lag when browsing folders with many large PDFs.
+
+
+## [1.4.76+99] - 2026-07-05
+### Performance Fix: Removed Blocking IO from FileManagerService
+- **Async File Fetching:** Replaced synchronous `.listSync()` and nested `.statSync()` inside sorting closures with a new highly concurrent `_getSortedFilesAsync` helper. 
+- **O(N) Optimization:** Instead of checking file stats O(N log N) times during sorting, we now fetch stats completely asynchronously, cache them in a Dart Record list `(FileSystemEntity, FileStat)`, sort them efficiently, and return. This prevents UI stuttering or jams in folders with 100+ files.
+
+
+## [1.4.75+98] - 2026-07-05
+### Bug Fix: Silent File Overwrites & Data Loss in FileManagerService
+- **Duplicate Prevention:** Added a private helper `_getUniqueFilePath` which dynamically appends numbers (e.g., `(1)`, `(2)`) to filenames if a file with the same name already exists in the destination folder.
+- **Fixed Methods:** Applied this duplicate-check to `moveToTrash`, `moveFolderToTrash`, `moveFileToFolder`, and `removeFileFromFolder` so users no longer silently lose data when organizing files or moving them to trash.
+
+
+## [1.4.74+97] - 2026-07-05
+### Bug Fix: Unhandled Camera Permissions & Infinite Loading in ScannerScreen
+- **Permission Handled:** Added explicit `Permission.camera.request()` check in `_initCamera()`. If denied, the app now shows a proper error message with an "Open Settings" button instead of failing silently.
+- **UI UX Fix:** Fixed the infinite loading screen dead-end. The loading state (`CircularProgressIndicator`) and error states now correctly display a functional Back button, allowing the user to safely exit the scanner screen instead of getting stuck.
+
+
+## [1.4.73+96] - 2026-07-05
+### Bug Fix: setState after dispose in ViewerScreen
+- **Crash Prevented:** Added `if (!mounted) return;` checks inside PDF native engine callbacks (`onViewerReady` and `onPageChanged`) in `viewer_screen.dart` to prevent crashes when the user quickly exits the viewer while a PDF is loading.
+
+
+## [1.4.72+95] - 2026-07-05
+### Bug Fix: setState after dispose in SettingsScreen
+- **Crash Prevented:** Added `if (!mounted) return;` checks after all async operations (like `SharedPreferences.getInstance()`, `PackageInfo.fromPlatform()`) in `settings_screen.dart` to prevent app crash if the user navigates away from the screen before the async operations complete.
+
+
 ## [1.4.71+94] - 2026-07-05
 ### Zero-Delay Intent Startup (Critical Performance Fix)
 - **Removed All Blocking Awaits Before `runApp()`:** Root cause of 5-6 second delay was 3 sequential `await` calls (`AdService.initialize()`, `NotificationService.initialize()`, `SharedPreferences.getInstance()`) blocking `runApp()`. Flutter engine couldn't start until these completed, keeping user stuck on native splash screen for 2-3 seconds before any Dart frame rendered.
@@ -573,3 +715,9 @@ Ye file project ka detailed record rakhti hai. Har update, state change, aur eve
  -   * * V e r s i o n   B u m p * * :   1 . 4 . 3 1 + 5 4   - >   1 . 4 . 3 2 + 5 5  
   
  
+### Update (Pre-Launch QA Fixes)
+- **Version Bump**: pubspec.yaml updated to 1.4.95+118.
+- **Pinned Files Leak Fix**: Fixed a data leak in FileManagerService. Now _updatePinnedPath correctly synchronizes SharedPreferences when files are renamed, moved to trash, vaulted, or permanently deleted.
+- **Watermark Text Overflow Fix**: Updated _watermarkPdf in pdf_tools_screen.dart to use PdfStringFormat with wordWrap: true and proper bounding rects to prevent very long watermark text from being cut off.
+- **Stale Reference Fix**: Added wait file.exists() check in iewer_screen.dart to prevent crashes when the user attempts to share or print a file that has been deleted in the background.
+- **Rule Compliance**: AGENTS.md rules followed (version bump & brain.md log).
