@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (authenticated && mounted) {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const VaultScreen()),
+                    MaterialPageRoute(builder: (context) => const VaultScreen(initialAuthPassed: true)),
                   ).then((_) => _loadFiles());
                 }
               },

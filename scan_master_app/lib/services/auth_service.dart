@@ -11,7 +11,7 @@ class AuthService {
       final bool canAuthenticate = canAuthenticateWithBiometrics || await _auth.isDeviceSupported();
 
       if (!canAuthenticate) {
-        return true;
+        return false;
       }
 
       final bool didAuthenticate = await _auth.authenticate(
@@ -19,14 +19,16 @@ class AuthService {
         authMessages: const <AuthMessages>[
           AndroidAuthMessages(
             signInTitle: 'Vault Authentication required',
-            cancelButton: 'No thanks',
+            cancelButton: 'Cancel',
           ),
           IOSAuthMessages(
-            cancelButton: 'No thanks',
+            cancelButton: 'Cancel',
           ),
         ],
-        biometricOnly: true,
-        persistAcrossBackgrounding: true,
+        options: const AuthenticationOptions(
+          biometricOnly: false,
+          stickyAuth: true,
+        ),
       );
 
       return didAuthenticate;

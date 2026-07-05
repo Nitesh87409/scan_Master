@@ -6,7 +6,8 @@ import '../widgets/file_thumbnail.dart';
 import '../utils/file_options_helper.dart';
 
 class VaultScreen extends StatefulWidget {
-  const VaultScreen({Key? key}) : super(key: key);
+  final bool initialAuthPassed;
+  const VaultScreen({Key? key, this.initialAuthPassed = false}) : super(key: key);
 
   @override
   State<VaultScreen> createState() => _VaultScreenState();
@@ -17,13 +18,33 @@ class _VaultScreenState extends State<VaultScreen> {
   List<FileSystemEntity> _vaultFiles = [];
   bool _isLoading = true;
 
+  bool _isAuthenticated = false;
+
   @override
   void initState() {
     super.initState();
-    _loadVaultFiles();
+    _isAuthenticated = widget.initialAuthPassed;
+    if (_isAuthenticated) {
+      _loadVaultFiles();
+    } else {
+      _checkAuth();
+    }
+  }
+
+  Future<void> _checkAuth() async {
+    final auth = await AuthService.authenticate();
+    if (auth) {
+      if (mounted) {
+        setState(() { _isAuthenticated = true; });
+        _loadVaultFiles();
+      }
+    } else {
+      if (mounted) Navigator.pop(context); // Kick user out if auth fails
+    }
   }
 
   Future<void> _loadVaultFiles() async {
+    if (!_isAuthenticated) return;
     setState(() => _isLoading = true);
     final vaultDir = await _fileManager.getVaultFolder();
     final files = vaultDir.listSync().where((f) => f is File).toList();
@@ -60,6 +81,22 @@ class _VaultScreenState extends State<VaultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isAuthenticated) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Secure Vault')),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock, size: 64, color: Colors.grey),
+              SizedBox(height: 16),
+              Text('Authentication required', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Secure Vault'),

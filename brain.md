@@ -2,6 +2,41 @@
 
 Ye file project ka detailed record rakhti hai. Har update, state change, aur event attachment yahan detail me log hoga.
 
+## [1.5.1+124] - 2026-07-05
+### Bug Fix (Minor): Controller Memory Leak
+- **Fix Applied:** `_watermarkPdf()` instantiated a `TextEditingController` for the dialog but never called `.dispose()` after the dialog closed. This caused a minor memory leak with repeated use. Now, `textController.dispose()` is reliably called right after the dialog awaits.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.1+124.
+
+## [1.5.0+123] - 2026-07-05
+### Stability Fix: Native Resource Leaks on Exception
+- **Vulnerability:** In `_exportToText()` and `_watermarkPdf()`, native resources like `TextRecognizer`, `IOSink`, and `PdfDocument` were only disposed in the happy path or on cancellation. If a runtime exception occurred, the `catch` block executed but bypassed resource disposal, leading to native memory leaks.
+- **Fix Applied:** Refactored the code to use robust `try-catch-finally` blocks. `TextRecognizer`, `IOSink`, and `PdfDocument` variables are declared before the `try` block and are reliably closed/disposed in the `finally` block, ensuring memory safety even if the process crashes.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.0+123.
+
+## [1.4.99+122] - 2026-07-05
+### Bug Fix (Medium): PDF Export Resource Leaks on Cancel
+- **Vulnerability:** When a user cancelled an active "Export to Images" or "Export to Text (OCR)" operation, the partially generated files (temporary PNG folders and incomplete `.txt` files) were not being cleaned up, leading to storage bloat.
+- **Fix Applied:** Updated `_exportToImages()` and `_exportToText()` in `pdf_tools_screen.dart` to explicitly call `delete()` on the temporary folder and text file when `_isCancelled` triggers during the loop.
+- **Version Bump:** `pubspec.yaml` updated to 1.4.99+122.
+
+## [1.4.98+121] - 2026-07-05
+### Security Fix: Defense in Depth for Secure Vault
+- **Vulnerability:** `VaultScreen` relied entirely on the caller for authentication. If opened via an intent, deep link, or another vector, it bypassed authentication entirely.
+- **Fix Applied:** Implemented 'defense in depth' by introducing an `initialAuthPassed` flag. `VaultScreen` now proactively checks authentication in its `initState()` if the flag is not set. If authentication fails, the user is immediately kicked out, preventing any unauthorized viewing of files.
+- **Version Bump:** `pubspec.yaml` updated to 1.4.98+121.
+
+## [1.4.97+120] - 2026-07-05
+### Security Fix (CRITICAL): Vault Authentication Bypass
+- **Vulnerability:** If a device did not have biometric authentication set up (or hardware was missing), `AuthService.authenticate()` returned `true` by default, silently granting unrestricted access to the Secure Vault.
+- **Fix Applied:** Modified `auth_service.dart`. It now correctly returns `false` if the device cannot authenticate. Additionally, implemented `AuthenticationOptions` with `biometricOnly: false` to allow fallback to device PIN/Pattern if biometrics fail or aren't set up.
+- **Version Bump:** `pubspec.yaml` updated to 1.4.97+120.
+
+## [1.4.96+119] - 2026-07-05
+### Bug Fix (UX): Root Route ViewerScreen Black Screen
+- **Fix Applied:** Modified `viewer_screen.dart` to check `Navigator.of(context).canPop()` on back press. If false (meaning the app was opened directly from an external share intent), it now calls `SystemNavigator.pop()` to properly minimize/close the app instead of getting stuck on a black loading screen.
+- **Impact:** Ensures a smooth exit back to WhatsApp/Files app when the user closes the PDF viewer from a deep link.
+- **Version Bump:** `pubspec.yaml` updated to 1.4.96+119.
+
 ## [1.4.94+117] - 2026-07-05
 ### Stability Fix: Intent Handling Fuzz-Proofing
 - **Validation Added:** Enclosed the `ReceiveSharingIntent` path parsing in `main.dart` with a `try-catch` block and added a strict `File(path).existsSync()` validation.

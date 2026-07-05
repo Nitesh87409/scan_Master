@@ -256,7 +256,12 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       
       int pageIndex = 1;
       await for (final page in Printing.raster(bytes, dpi: 150)) {
-        if (_isCancelled) return;
+        if (_isCancelled) {
+          try {
+            if (await dir.exists()) await dir.delete(recursive: true);
+          } catch (_) {}
+          return;
+        }
         final imageFile = File('$folderPath/page_$pageIndex.png');
         await imageFile.writeAsBytes(await page.toPng());
         pageIndex++;
@@ -288,6 +293,9 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     });
     _startSimulatedProgress();
     
+    TextRecognizer? textRecognizer;
+    IOSink? sink;
+
     try {
       final bytes = await File(_selectedFile!.path).readAsBytes();
       final outputDir = await getApplicationDocumentsDirectory();
@@ -295,15 +303,18 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       
       final textFilePath = '${outputDir.path}/scan_extracted_$timestamp.txt';
       final textFile = File(textFilePath);
-      final sink = textFile.openWrite();
+      sink = textFile.openWrite();
       
-      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
       
       int pageIndex = 1;
       await for (final page in Printing.raster(bytes, dpi: 150)) {
         if (_isCancelled) {
           textRecognizer.close();
           await sink.close();
+          try {
+            if (await textFile.exists()) await textFile.delete();
+          } catch (_) {}
           return;
         }
         
@@ -327,6 +338,9 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       _finishTask('Text Extracted Successfully', filePath: textFilePath);
     } catch (e) {
       _finishTask('Export Failed', error: e.toString());
+    } finally {
+      textRecognizer?.close();
+      await sink?.close();
     }
   }
 
@@ -354,6 +368,7 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
         ],
       ),
     );
+    textController.dispose();
 
     if (watermarkText == null || watermarkText.trim().isEmpty) return;
 
@@ -364,16 +379,17 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     });
     _startSimulatedProgress();
 
+    sf.PdfDocument? document;
+
     try {
       final bytes = await File(_selectedFile!.path).readAsBytes();
-      final document = sf.PdfDocument(inputBytes: bytes);
+      document = sf.PdfDocument(inputBytes: bytes);
       
       final font = sf.PdfStandardFont(sf.PdfFontFamily.helvetica, 60);
       final brush = sf.PdfSolidBrush(sf.PdfColor(150, 150, 150));
       
       for (int i = 0; i < document.pages.count; i++) {
         if (_isCancelled) {
-          document.dispose();
           return;
         }
         final page = document.pages[i];
@@ -404,7 +420,6 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       }
       
       final outputBytes = await document.save();
-      document.dispose();
       
       final outputDir = await getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -414,6 +429,8 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       _finishTask('Watermark added successfully', filePath: outPath);
     } catch (e) {
       _finishTask('Failed to add watermark', error: e.toString());
+    } finally {
+      document?.dispose();
     }
   }
 
