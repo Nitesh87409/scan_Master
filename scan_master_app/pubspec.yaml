@@ -1,0 +1,55 @@
+name: scan_master_app
+description: "A premium Material 3 Document Scanner and PDF Toolkit app"
+publish_to: 'none'
+
+version: 1.4.71+94
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  camera: ^0.12.0+1
+  image_picker: ^1.2.3
+  pdf: ^3.13.0
+  printing: ^5.11.1
+  file_picker: ^8.0.7
+  path_provider: ^2.1.6
+  permission_handler: ^12.0.3
+  share_plus: any
+  google_mobile_ads: ^9.0.0
+  image: ^4.9.1
+  google_mlkit_text_recognition: ^0.15.1
+  google_mlkit_document_scanner: ^0.4.1
+  signature: ^6.3.0
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.2.0
+  open_filex: ^4.7.0
+  gal: ^2.3.2
+  package_info_plus: ^9.0.1
+  shared_preferences: ^2.5.5
+  url_launcher: ^6.3.1
+  archive: ^4.0.9
+  pro_image_editor: ^13.0.0
+  flutter_local_notifications: ^22.0.1
+  pdf_manipulator: ^2.1.1
+  pdfrx: ^2.4.4
+  receive_sharing_intent: 1.8.0
+  reorderable_grid_view: ^2.2.8
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+  min_sdk_android: 21
