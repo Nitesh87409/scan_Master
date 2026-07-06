@@ -6,7 +6,7 @@ import '../constants/app_strings.dart';
 import '../core/animations.dart';
 import 'folder_view_screen.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'viewer_screen.dart';
 import '../widgets/file_thumbnail.dart';
 import 'package:shared_preferences/shared_preferences.dart';

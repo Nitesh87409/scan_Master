@@ -2,6 +2,11 @@
 
 Ye file project ka detailed record rakhti hai. Har update, state change, aur event attachment yahan detail me log hoga.
 
+## [1.5.12+135] - 2026-07-06
+### Bug Fix: Vault Restore Failure
+- **Fix Applied:** Fixed an issue in `vault_screen.dart` where `_moveToNormal()` silently failed to restore files if the user didn't have any folders created yet. Swapped `_fileManager.getFolders()` logic with a direct call to `getApplicationDocumentsDirectory()`, ensuring files restore safely to the root directory regardless of folder states.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.12+135.
+
 ## [1.5.11+134] - 2026-07-06
 ### Code Quality (Minor): Duplicate Imports Removed
 - **Fix Applied:** Removed duplicate import of `package:flutter/material.dart` in `folders_screen.dart` and `qr_toolkit_screen.dart` in `home_screen.dart` to clean up analyzer warnings.

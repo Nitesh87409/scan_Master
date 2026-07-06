@@ -4,7 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
-import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import '../constants/document_filters.dart';
 import '../utils/file_options_helper.dart';
 import '../utils/file_filter_util.dart';

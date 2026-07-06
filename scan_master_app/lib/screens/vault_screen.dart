@@ -4,6 +4,7 @@ import '../services/file_manager_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/file_thumbnail.dart';
 import '../utils/file_options_helper.dart';
+import 'package:path_provider/path_provider.dart';
 
 class VaultScreen extends StatefulWidget {
   final bool initialAuthPassed;
@@ -61,9 +62,8 @@ class _VaultScreenState extends State<VaultScreen> {
 
   Future<void> _moveToNormal(FileSystemEntity file) async {
     try {
-      final mainDir = await _fileManager.getFolders().then((f) => f.isEmpty ? null : f.first.parent);
-      if (mainDir == null) return;
-      
+      final mainDir = await getApplicationDocumentsDirectory();
+
       final fileName = file.path.split(Platform.pathSeparator).last;
       final newPath = '${mainDir.path}/$fileName';
       await (file as File).rename(newPath);
