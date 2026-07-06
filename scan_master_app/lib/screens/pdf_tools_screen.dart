@@ -12,6 +12,7 @@ import 'package:printing/printing.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:archive/archive_io.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as sf;
+import 'package:image/image.dart' as img;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'viewer_screen.dart';
 import '../widgets/file_thumbnail.dart';
@@ -555,15 +556,20 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     await for (final page in pages) {
       if (_isCancelled) break;
       
-      // Convert rendered page to PNG bytes, then decode to raw image
+      // Convert rendered page to PNG, then re-encode as JPEG with actual quality
       final pngBytes = await page.toPng();
       
-      // Use Syncfusion to create a new page with the compressed image
+      // Decode PNG and re-encode as JPEG — THIS is where quality compression happens
+      final decoded = img.decodePng(pngBytes);
+      final jpegBytes = decoded != null
+          ? Uint8List.fromList(img.encodeJpg(decoded, quality: jpegQuality))
+          : pngBytes; // fallback if decode fails
+      
+      // Use Syncfusion to create a new page with the compressed JPEG image
       final sf.PdfPage pdfPage = pdfDoc.pages.add();
       final pageSize = pdfPage.getClientSize();
       
-      // Load the rendered image as JPEG with specified quality
-      final sf.PdfBitmap image = sf.PdfBitmap(pngBytes);
+      final sf.PdfBitmap image = sf.PdfBitmap(jpegBytes);
       
       // Draw image to fill the entire page
       pdfPage.graphics.drawImage(
