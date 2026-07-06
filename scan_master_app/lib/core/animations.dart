@@ -120,13 +120,7 @@ class AppAnimations {
     Color? backgroundColor,
     ShapeBorder? shape,
   }) {
-    final controller = AnimationController(
-      vsync: Navigator.of(context).overlay!,
-      duration: const Duration(milliseconds: 280),
-      reverseDuration: const Duration(milliseconds: 220),
-    );
-    
-    final future = showModalBottomSheet<T>(
+    return showModalBottomSheet<T>(
       context: context,
       builder: builder,
       isScrollControlled: isScrollControlled,
@@ -136,10 +130,6 @@ class AppAnimations {
       shape: shape ?? const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      transitionAnimationController: controller,
     );
-    
-    future.whenComplete(() => controller.dispose());
-    return future;
   }
 }

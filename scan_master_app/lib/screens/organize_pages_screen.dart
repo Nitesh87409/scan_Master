@@ -115,12 +115,21 @@ class _OrganizePagesScreenState extends State<OrganizePagesScreen> {
 
   @override
   void dispose() {
+    for (final image in _thumbnails.values) {
+      image.dispose();
+    }
     _document?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Pre-calculate positions to avoid O(n^2) indexOf lookup in the loop
+    final Map<int, int> pagePositions = {};
+    for (int i = 0; i < _pageOrder.length; i++) {
+      pagePositions[_pageOrder[i]] = i;
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -166,7 +175,7 @@ class _OrganizePagesScreenState extends State<OrganizePagesScreen> {
                                 color: Colors.black54,
                                 padding: const EdgeInsets.symmetric(vertical: 4),
                                 child: Text(
-                                  '${_pageOrder.indexOf(pageIndex) + 1}', // Display current visual sequence number
+                                  '${pagePositions[pageIndex]! + 1}', // Display current visual sequence number
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                 ),

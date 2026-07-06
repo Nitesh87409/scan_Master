@@ -30,6 +30,15 @@ class _VisualSplitPdfScreenState extends State<VisualSplitPdfScreen> {
     _loadPdf();
   }
 
+  @override
+  void dispose() {
+    for (final image in _thumbnails.values) {
+      image.dispose();
+    }
+    _document?.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadPdf() async {
     try {
       _document = await PdfDocument.openFile(widget.file.path);

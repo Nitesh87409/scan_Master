@@ -15,6 +15,7 @@ class TrashScreen extends StatefulWidget {
 class _TrashScreenState extends State<TrashScreen> {
   final FileManagerService _fileManager = FileManagerService();
   List<FileSystemEntity> _trashFiles = [];
+  final Map<String, FileStat> _fileStats = {};
   bool _isLoading = true;
 
   @override
@@ -26,9 +27,18 @@ class _TrashScreenState extends State<TrashScreen> {
   Future<void> _loadTrash() async {
     setState(() => _isLoading = true);
     final files = await _fileManager.getTrashFiles();
+    
+    // Precompute stats to avoid blocking I/O in the build method
+    final Map<String, FileStat> newStats = {};
+    for (final file in files) {
+      newStats[file.path] = file.statSync();
+    }
+
     if (mounted) {
       setState(() {
         _trashFiles = files;
+        _fileStats.clear();
+        _fileStats.addAll(newStats);
         _isLoading = false;
       });
     }
@@ -161,8 +171,8 @@ class _TrashScreenState extends State<TrashScreen> {
                     final trashFileName = file.path.split(Platform.pathSeparator).last;
                     final originalName = _getOriginalName(trashFileName);
                     final location = _getOriginalLocation(trashFileName);
-                    final stat = file.statSync();
-                    final daysInTrash = DateTime.now().difference(stat.modified).inDays;
+                    final stat = _fileStats[file.path];
+                    final daysInTrash = stat != null ? DateTime.now().difference(stat.modified).inDays : 0;
                     
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),

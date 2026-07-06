@@ -2,6 +2,70 @@
 
 Ye file project ka detailed record rakhti hai. Har update, state change, aur event attachment yahan detail me log hoga.
 
+## [1.5.11+134] - 2026-07-06
+### Code Quality (Minor): Duplicate Imports Removed
+- **Fix Applied:** Removed duplicate import of `package:flutter/material.dart` in `folders_screen.dart` and `qr_toolkit_screen.dart` in `home_screen.dart` to clean up analyzer warnings.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.11+134.
+
+## [1.5.10+133] - 2026-07-06
+### Bug Fix (Medium): OOM Risk on Folder Share
+- **Fix Applied:** Modified `_shareFolder` in both `folder_view_screen.dart` and `folders_screen.dart`. Replaced the memory-heavy `Archive` and `ZipEncoder` (which read all file bytes into memory simultaneously) with `ZipFileEncoder`. `ZipFileEncoder` streams files directly from the disk into the zip archive, preventing Out of Memory (OOM) crashes on low-end devices when sharing folders with many large PDFs.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.10+133.
+
+## [1.5.9+132] - 2026-07-06
+### Performance Fix (Medium): Trash Screen Blocking I/O
+- **Fix Applied:** Modified `trash_screen.dart` to prevent O(n) synchronous disk reads (`statSync`) inside the `ListView.builder`. File stats are now precomputed asynchronously in `_loadTrash()` and stored in a local `_fileStats` Map, eliminating scrolling jank when the trash contains many files.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.9+132.
+
+## [1.5.8+131] - 2026-07-06
+### Bug Fix (Critical): Dismissible Crash Risk (Swipe-to-delete)
+- **Fix Applied:** Modified `onDismissed` callbacks for `Dismissible` widgets in both `home_screen.dart` and `folders_screen.dart`. Instead of executing asynchronous file operations directly inside `onDismissed` (which caused the widget to remain in the tree longer than permitted, triggering a Flutter crash), the item is now removed synchronously from the local list via `setState`, and the heavy `moveToTrash` and `_loadFiles()` tasks run asynchronously in the background.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.8+131.
+
+## [1.5.7+130] - 2026-07-06
+### Bug Fix (Memory Leaks & Performance)
+- **Fix Applied (`visual_split_pdf_screen.dart`):** Added a missing `dispose()` method to release native `PdfDocument` handles and correctly iterate over `_thumbnails.values` to dispose of `ui.Image` bitmap references, preventing memory leaks on screen pop.
+- **Fix Applied (`organize_pages_screen.dart`):** Updated `dispose()` to correctly iterate over `_thumbnails.values` and call `.dispose()` on `ui.Image` references, preventing bitmap memory leaks.
+- **Performance (`organize_pages_screen.dart`):** Replaced the O(n²) `_pageOrder.indexOf()` lookup inside the UI builder loop with an O(1) `Map<int, int>` lookup initialized at the start of the `build` method. This eliminates drag-and-drop lag on large PDFs.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.7+130.
+
+## [1.5.6+129] - 2026-07-06
+### Bug Fix (Critical): Broken Import Path causing Compile Failure
+- **Fix Applied:** Fixed incorrect import path in `filter_screen.dart`. Changed `import '../pdf_toolkit/pdf_service.dart';` (which doesn't exist) to `import '../services/pdf_service.dart';`. This resolves a fatal compilation error during flutter run/build.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.6+129.
+
+## [1.5.5+128] - 2026-07-06
+### Bug Fix (High): File Options Panel Double-Open Crash
+- **Fix Applied:** 
+  - Added a static `_isShowing` debounce guard in `FileOptionsHelper.showFileOptions()` to prevent multiple simultaneous bottom sheets if the user double-taps quickly.
+  - Removed the custom `AnimationController` and `vsync: Navigator.of(context).overlay!` from `AppAnimations.showPremiumBottomSheet()`. The custom controller was causing an assertion error crash when two bottom sheets overlapped. Flutter's default bottom sheet animation is now used, resolving the conflict.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.5+128.
+
+## [1.5.4+127] - 2026-07-06
+### Feature Upgrade: Compress PDF — User Controls + Honest Reporting
+- **New UI:** `_showCompressOptionsDialog()` bottom sheet added with:
+  - Quick presets: Low (quality 20) / Medium (quality 45) / High (quality 70)
+  - Custom target size in MB (TextField)
+  - Custom reduce-by-% (Slider, 10–90%)
+  - Current file size displayed upfront
+- **Iterative Engine:** `_compressPdf()` now uses a quality ladder `[70, 55, 40, 25, 15]` for custom targets, trying progressively more aggressive compression until the target is met or best possible result is found.
+- **Honest Reporting:** Result now shows `"Original: X.XX MB → Compressed: Y.YY MB (Z% smaller)"`. If target not fully reachable, says so explicitly. If already optimized, says `"no further size reduction possible"` instead of fake "Successful".
+- **Resource Safety:** Each compression attempt uses `try-finally` for `Pdf`/`FileSink` disposal. Worse attempts and cancelled files are cleaned up immediately.
+- **Input Validation:** Invalid/empty target size gracefully handled with error message, no crash.
+- **Controller Leak Prevention:** `targetMBController.dispose()` called via `.whenComplete()`.
+- **New Strings:** 16 new dynamic constants added to `app_strings.dart` for the compress dialog.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.4+127.
+
+## [1.5.3+126] - 2026-07-05
+### Bug Fix (Minor): Quick Actions Race Condition
+- **Fix Applied:** Modified `_setupQuickActions()` in `home_screen.dart` to wrap the `_startScan()` callback in a `WidgetsBinding.instance.addPostFrameCallback` with a `mounted` check. This prevents a rare race condition where a quick action could trigger navigation before the widget context was fully initialized during a cold start.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.3+126.
+
+## [1.5.2+125] - 2026-07-05
+### Code Quality Fix: Duplicate Import
+- **Fix Applied:** Removed duplicate import of `file_manager_service.dart` in `home_screen.dart` to resolve flutter analyze warnings and maintain clean code.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.2+125.
+
 ## [1.5.1+124] - 2026-07-05
 ### Bug Fix (Minor): Controller Memory Leak
 - **Fix Applied:** `_watermarkPdf()` instantiated a `TextEditingController` for the dialog but never called `.dispose()` after the dialog closed. This caused a minor memory leak with repeated use. Now, `textController.dispose()` is reliably called right after the dialog awaits.

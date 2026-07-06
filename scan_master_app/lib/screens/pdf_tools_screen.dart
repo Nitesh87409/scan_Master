@@ -20,6 +20,15 @@ import '../constants/app_strings.dart';
 import '../main.dart'; // import for rootScaffoldMessengerKey
 import '../services/notification_service.dart';
 
+enum CompressMode { low, medium, high, targetSize, targetPercent }
+
+class CompressionConfig {
+  final CompressMode mode;
+  final double? targetMB;
+  final int? targetPercent;
+  CompressionConfig({required this.mode, this.targetMB, this.targetPercent});
+}
+
 class PdfToolsScreen extends StatefulWidget {
   final FileSystemEntity? initialFile;
   final String? initialMode;
@@ -196,43 +205,291 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     }
   }
 
+  Future<CompressionConfig?> _showCompressOptionsDialog(double currentSizeMB) async {
+    CompressMode selectedMode = CompressMode.medium;
+    final targetMBController = TextEditingController();
+    double targetPercent = 50;
+
+    return showModalBottomSheet<CompressionConfig>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20, right: 20, top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(AppStrings.compressOptionsTitle,
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 4),
+                  Text('${AppStrings.compressCurrentSize} ${currentSizeMB.toStringAsFixed(2)} MB',
+                      style: TextStyle(color: Colors.grey[600])),
+                  const SizedBox(height: 16),
+                  Text(AppStrings.compressQuickPresets,
+                      style: Theme.of(context).textTheme.labelLarge),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: Text(AppStrings.compressLowLabel),
+                        selected: selectedMode == CompressMode.low,
+                        onSelected: (_) =>
+                            setModalState(() => selectedMode = CompressMode.low),
+                      ),
+                      ChoiceChip(
+                        label: Text(AppStrings.compressMediumLabel),
+                        selected: selectedMode == CompressMode.medium,
+                        onSelected: (_) =>
+                            setModalState(() => selectedMode = CompressMode.medium),
+                      ),
+                      ChoiceChip(
+                        label: Text(AppStrings.compressHighLabel),
+                        selected: selectedMode == CompressMode.high,
+                        onSelected: (_) =>
+                            setModalState(() => selectedMode = CompressMode.high),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 32),
+                  Row(
+                    children: [
+                      Radio<CompressMode>(
+                        value: CompressMode.targetSize,
+                        groupValue: selectedMode,
+                        onChanged: (v) =>
+                            setModalState(() => selectedMode = v!),
+                      ),
+                      Text(AppStrings.compressTargetSizeLabel),
+                    ],
+                  ),
+                  if (selectedMode == CompressMode.targetSize)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 40, bottom: 12),
+                      child: TextField(
+                        controller: targetMBController,
+                        keyboardType:
+                            const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          hintText: AppStrings.compressTargetSizeHint,
+                          suffixText: 'MB',
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                  Row(
+                    children: [
+                      Radio<CompressMode>(
+                        value: CompressMode.targetPercent,
+                        groupValue: selectedMode,
+                        onChanged: (v) =>
+                            setModalState(() => selectedMode = v!),
+                      ),
+                      Text(AppStrings.compressReduceByLabel),
+                    ],
+                  ),
+                  if (selectedMode == CompressMode.targetPercent)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 40),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Slider(
+                              value: targetPercent,
+                              min: 10,
+                              max: 90,
+                              divisions: 16,
+                              label: '${targetPercent.round()}%',
+                              onChanged: (v) =>
+                                  setModalState(() => targetPercent = v),
+                            ),
+                          ),
+                          Text('${targetPercent.round()}%'),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final config = CompressionConfig(
+                          mode: selectedMode,
+                          targetMB: selectedMode == CompressMode.targetSize
+                              ? double.tryParse(
+                                  targetMBController.text.trim())
+                              : null,
+                          targetPercent:
+                              selectedMode == CompressMode.targetPercent
+                                  ? targetPercent.round()
+                                  : null,
+                        );
+                        Navigator.pop(context, config);
+                      },
+                      child: Text(AppStrings.compressButtonLabel),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(() => targetMBController.dispose());
+  }
+
   Future<void> _compressPdf() async {
     if (_selectedFile == null) return;
-    
+
+    final originalSize = await _selectedFile!.length();
+    final originalMB = originalSize / (1024 * 1024);
+
+    // Show options dialog BEFORE entering processing state
+    final config = await _showCompressOptionsDialog(originalMB);
+    if (config == null) return; // user cancelled
+
+    // Validation for target size mode
+    if (config.mode == CompressMode.targetSize) {
+      if (config.targetMB == null || config.targetMB! <= 0) {
+        _finishTask(AppStrings.compressInvalidTarget,
+            error: AppStrings.compressInvalidTargetMsg);
+        return;
+      }
+      if (config.targetMB! >= originalMB) {
+        _finishTask(AppStrings.compressNotNeeded,
+            error:
+                'File is already smaller than your target (${originalMB.toStringAsFixed(2)} MB)');
+        return;
+      }
+    }
+
     setState(() {
       _isCancelled = false;
       _isProcessing = true;
-      _progressMessage = AppStrings.compressPdf;
+      _progressMessage = AppStrings.compressingPdf;
     });
     _startSimulatedProgress();
-    
-    final outputDir = await getApplicationDocumentsDirectory();
+
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final compressedFilePath = '${outputDir.path}/scan_compressed_$timestamp.pdf';
-    
+    final outputDir = await getApplicationDocumentsDirectory();
+
+    // Quality ladder per mode
+    List<int> qualityLadder;
+    switch (config.mode) {
+      case CompressMode.low:
+        qualityLadder = [20];
+        break;
+      case CompressMode.medium:
+        qualityLadder = [45];
+        break;
+      case CompressMode.high:
+        qualityLadder = [70];
+        break;
+      case CompressMode.targetSize:
+      case CompressMode.targetPercent:
+        qualityLadder = [70, 55, 40, 25, 15];
+        break;
+    }
+
+    String? bestPath;
+    int bestSize = originalSize;
+    double? targetBytes;
+    if (config.mode == CompressMode.targetSize) {
+      targetBytes = config.targetMB! * 1024 * 1024;
+    } else if (config.mode == CompressMode.targetPercent) {
+      targetBytes = originalSize * (1 - config.targetPercent! / 100);
+    }
+
     try {
-      final pdf = Pdf();
-      final outSink = await FileSink.create(File(compressedFilePath));
-      
-      final handle = await pdf.edit(FileSource(_selectedFile!));
-      await handle.optimizeImages(quality: 40, minSize: 100);
-      await handle.unembedStandardFonts();
-      
-      await handle.save(outSink);
-      await handle.dispose();
-      await outSink.close();
-      await pdf.dispose();
-      
-      if (_isCancelled) {
+      for (final q in qualityLadder) {
+        if (_isCancelled) break;
+
+        final attemptPath =
+            '${outputDir.path}/scan_compressed_${timestamp}_q$q.pdf';
+
+        final pdf = Pdf();
+        final outSink = await FileSink.create(File(attemptPath));
         try {
-          if (await File(compressedFilePath).exists()) await File(compressedFilePath).delete();
-        } catch (_) {}
+          final handle = await pdf.edit(FileSource(_selectedFile!));
+          await handle.optimizeImages(quality: q, minSize: 50);
+          await handle.unembedStandardFonts();
+          await handle.save(outSink);
+          await handle.dispose();
+        } finally {
+          await outSink.close();
+          await pdf.dispose();
+        }
+
+        final attemptSize = await File(attemptPath).length();
+
+        if (attemptSize < bestSize) {
+          // Delete previous best to avoid leftover files
+          if (bestPath != null) {
+            try { await File(bestPath).delete(); } catch (_) {}
+          }
+          bestPath = attemptPath;
+          bestSize = attemptSize;
+        } else {
+          // This attempt was worse — delete it
+          try { await File(attemptPath).delete(); } catch (_) {}
+        }
+
+        // Stop early if target met
+        if (targetBytes != null && bestSize <= targetBytes) break;
+
+        // For fixed presets, one pass is enough
+        if (config.mode == CompressMode.low ||
+            config.mode == CompressMode.medium ||
+            config.mode == CompressMode.high) break;
+      }
+
+      // Handle cancellation cleanup
+      if (_isCancelled) {
+        if (bestPath != null) {
+          try { await File(bestPath).delete(); } catch (_) {}
+        }
+        setState(() => _isProcessing = false);
+        _stopSimulatedProgress();
         return;
       }
-      
-      _finishTask('Compression Successful', filePath: compressedFilePath);
+
+      // No meaningful reduction
+      if (bestPath == null || bestSize >= originalSize) {
+        _finishTask(AppStrings.compressFailed,
+            error: AppStrings.compressAlreadyOptimized);
+        return;
+      }
+
+      final compressedMB = bestSize / (1024 * 1024);
+      final percentSaved =
+          ((originalSize - bestSize) / originalSize * 100).round();
+
+      String resultMessage;
+      if (targetBytes != null && bestSize > targetBytes) {
+        resultMessage =
+            'Target not fully reached.\nOriginal: ${originalMB.toStringAsFixed(2)} MB → '
+            'Best possible: ${compressedMB.toStringAsFixed(2)} MB ($percentSaved% smaller)';
+      } else {
+        resultMessage =
+            'Original: ${originalMB.toStringAsFixed(2)} MB → '
+            'Compressed: ${compressedMB.toStringAsFixed(2)} MB ($percentSaved% smaller)';
+      }
+
+      _finishTask(resultMessage, filePath: bestPath);
     } catch (e) {
-      _finishTask('Compression Failed', error: e.toString());
+      if (bestPath != null) {
+        try { await File(bestPath).delete(); } catch (_) {}
+      }
+      _finishTask(AppStrings.compressFailed, error: e.toString());
     }
   }
 

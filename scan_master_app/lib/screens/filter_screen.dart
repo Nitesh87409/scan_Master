@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../pdf_toolkit/pdf_service.dart';
+import '../services/pdf_service.dart';
 
 class FilterScreen extends StatelessWidget {
   final String imagePath;

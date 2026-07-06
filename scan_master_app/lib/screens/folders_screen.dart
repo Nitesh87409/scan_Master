@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import '../services/file_manager_service.dart';
 import '../constants/app_strings.dart';
@@ -185,19 +184,14 @@ class _FoldersScreenState extends State<FoldersScreen> {
       final tempDir = await getTemporaryDirectory();
       final zipFile = File('${tempDir.path}/$folderName.zip');
       
-      final archive = Archive();
+      final zipEncoder = ZipFileEncoder();
+      zipEncoder.create(zipFile.path);
       for (final file in files) {
-        final fileName = file.path.split(Platform.pathSeparator).last;
-        final bytes = await file.readAsBytes();
-        archive.addFile(ArchiveFile(fileName, bytes.length, bytes));
+        zipEncoder.addFile(file);
       }
-      
-      final zipEncoder = ZipEncoder();
-      final zipBytes = zipEncoder.encode(archive);
-      if (zipBytes != null) {
-        await zipFile.writeAsBytes(zipBytes);
-        await Share.shareXFiles([XFile(zipFile.path)], text: 'Shared $folderName from Scan Master');
-      }
+      zipEncoder.close();
+
+      await Share.shareXFiles([XFile(zipFile.path)], text: 'Shared $folderName from Scan Master');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -270,31 +264,35 @@ class _FoldersScreenState extends State<FoldersScreen> {
                             color: Colors.red,
                             child: const Icon(Icons.delete, color: Colors.white),
                           ),
-                          onDismissed: (direction) async {
+                          onDismissed: (direction) {
                             final messenger = ScaffoldMessenger.of(context);
-                            final trashPath = await _fileManager.moveFolderToTrash(folder.path);
-                            _loadFolders();
-                            if (mounted && trashPath != null) {
-                              messenger.clearSnackBars();
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: const Text(AppStrings.msgFolderMovedToTrash),
-                                  duration: const Duration(seconds: 2),
-                                  action: SnackBarAction(
-                                    label: AppStrings.actionUndo,
-                                    onPressed: () async {
-                                      await _fileManager.restoreFromTrash(trashPath);
-                                      _loadFolders();
-                                    },
+                            setState(() {
+                              _folders.removeWhere((f) => f.path == folder.path);
+                            });
+                            _fileManager.moveFolderToTrash(folder.path).then((trashPath) {
+                              _loadFolders();
+                              if (mounted && trashPath != null) {
+                                messenger.clearSnackBars();
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: const Text(AppStrings.msgFolderMovedToTrash),
+                                    duration: const Duration(seconds: 2),
+                                    action: SnackBarAction(
+                                      label: AppStrings.actionUndo,
+                                      onPressed: () async {
+                                        await _fileManager.restoreFromTrash(trashPath);
+                                        _loadFolders();
+                                      },
+                                    ),
                                   ),
-                                ),
-                              );
-                              Future.delayed(const Duration(seconds: 2), () {
-                                if (mounted) {
-                                  messenger.hideCurrentSnackBar();
-                                }
-                              });
-                            }
+                                );
+                                Future.delayed(const Duration(seconds: 2), () {
+                                  if (mounted) {
+                                    messenger.hideCurrentSnackBar();
+                                  }
+                                });
+                              }
+                            });
                           },
                           child: Card(
                             margin: const EdgeInsets.only(bottom: 12),
@@ -403,29 +401,33 @@ class _FoldersScreenState extends State<FoldersScreen> {
                             color: Colors.red,
                             child: const Icon(Icons.delete, color: Colors.white),
                           ),
-                          onDismissed: (direction) async {
+                          onDismissed: (direction) {
                             final messenger = ScaffoldMessenger.of(context);
-                            final trashPath = await _fileManager.moveToTrash(file.path);
-                            _loadFolders();
-                            if (mounted && trashPath != null) {
-                              messenger.clearSnackBars();
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: const Text(AppStrings.msgMovedToTrash),
-                                  duration: const Duration(seconds: 2),
-                                  action: SnackBarAction(
-                                    label: AppStrings.actionUndo,
-                                    onPressed: () async {
-                                      await _fileManager.restoreFromTrash(trashPath);
-                                      _loadFolders();
-                                    },
+                            setState(() {
+                              _files.removeWhere((f) => f.path == file.path);
+                            });
+                            _fileManager.moveToTrash(file.path).then((trashPath) {
+                              _loadFolders();
+                              if (mounted && trashPath != null) {
+                                messenger.clearSnackBars();
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: const Text(AppStrings.msgMovedToTrash),
+                                    duration: const Duration(seconds: 2),
+                                    action: SnackBarAction(
+                                      label: AppStrings.actionUndo,
+                                      onPressed: () async {
+                                        await _fileManager.restoreFromTrash(trashPath);
+                                        _loadFolders();
+                                      },
+                                    ),
                                   ),
-                                ),
-                              );
-                              Future.delayed(const Duration(seconds: 2), () {
-                                if (mounted) messenger.hideCurrentSnackBar();
-                              });
-                            }
+                                );
+                                Future.delayed(const Duration(seconds: 2), () {
+                                  if (mounted) messenger.hideCurrentSnackBar();
+                                });
+                              }
+                            });
                           },
                           child: Card(
                             margin: const EdgeInsets.only(bottom: 12),

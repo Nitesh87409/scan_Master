@@ -86,6 +86,22 @@ class AppStrings {
   static const String compressPdf = 'Compress PDF';
   static const String compressPdfTitle = 'Compress PDF';
   static const String descCompressPdf = 'Reduce PDF file size for easier sharing';
+  static const String compressOptionsTitle = 'Compress PDF';
+  static const String compressCurrentSize = 'Current size:';
+  static const String compressQuickPresets = 'Quick Presets';
+  static const String compressLowLabel = 'Low (smallest file)';
+  static const String compressMediumLabel = 'Medium (balanced)';
+  static const String compressHighLabel = 'High Quality';
+  static const String compressTargetSizeLabel = 'Set target size (MB)';
+  static const String compressTargetSizeHint = 'e.g. 1.5';
+  static const String compressReduceByLabel = 'Reduce by %';
+  static const String compressButtonLabel = 'Compress';
+  static const String compressInvalidTarget = 'Invalid target size';
+  static const String compressInvalidTargetMsg = 'Please enter a valid target size in MB';
+  static const String compressNotNeeded = 'No compression needed';
+  static const String compressFailed = 'Compression Failed';
+  static const String compressAlreadyOptimized = 'This PDF is already optimized — no further size reduction possible';
+  static const String compressingPdf = 'Compressing PDF...';
   static const String addPassword = 'Add Password';
   
   static const String exportImagesTitle = 'Export to Images';

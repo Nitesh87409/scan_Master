@@ -16,8 +16,6 @@ import '../services/ad_service.dart';
 import '../ocr/ocr_screen.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-
-import '../services/file_manager_service.dart';
 import 'viewer_screen.dart';
 import '../widgets/file_thumbnail.dart';
 import '../utils/file_options_helper.dart';
@@ -29,7 +27,6 @@ import 'settings_screen.dart';
 import 'signature_screen.dart';
 import 'qr_toolkit_screen.dart';
 import '../core/animations.dart';
-import 'qr_toolkit_screen.dart';
 import 'pdf_tools_screen.dart';
 import '../constants/app_strings.dart';
 
@@ -62,7 +59,11 @@ class _HomeScreenState extends State<HomeScreen> {
     const QuickActions quickActions = QuickActions();
     quickActions.initialize((String shortcutType) {
       if (shortcutType == 'action_scan') {
-        _startScan(isGallery: false);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _startScan(isGallery: false);
+          }
+        });
       }
     });
 
@@ -486,29 +487,33 @@ class _HomeScreenState extends State<HomeScreen> {
                           margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
                           child: const Icon(Icons.delete, color: Colors.white),
                         ),
-                        onDismissed: (direction) async {
+                        onDismissed: (direction) {
                           final messenger = ScaffoldMessenger.of(context);
-                          final trashPath = await _fileManager.moveToTrash(file.path);
-                          _loadFiles();
-                          if (mounted && trashPath != null) {
-                            messenger.clearSnackBars();
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: const Text(AppStrings.msgMovedToTrash),
-                                duration: const Duration(seconds: 2),
-                                action: SnackBarAction(
-                                  label: AppStrings.actionUndo,
-                                  onPressed: () async {
-                                    await _fileManager.restoreFromTrash(trashPath);
-                                    _loadFiles();
-                                  },
+                          setState(() {
+                            _recentFiles.removeWhere((f) => f.path == file.path);
+                          });
+                          _fileManager.moveToTrash(file.path).then((trashPath) {
+                            _loadFiles();
+                            if (mounted && trashPath != null) {
+                              messenger.clearSnackBars();
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: const Text(AppStrings.msgMovedToTrash),
+                                  duration: const Duration(seconds: 2),
+                                  action: SnackBarAction(
+                                    label: AppStrings.actionUndo,
+                                    onPressed: () async {
+                                      await _fileManager.restoreFromTrash(trashPath);
+                                      _loadFiles();
+                                    },
+                                  ),
                                 ),
-                              ),
-                            );
-                            Future.delayed(const Duration(seconds: 2), () {
-                              if (mounted) messenger.hideCurrentSnackBar();
-                            });
-                          }
+                              );
+                              Future.delayed(const Duration(seconds: 2), () {
+                                if (mounted) messenger.hideCurrentSnackBar();
+                              });
+                            }
+                          });
                         },
                         child: Card(
                           margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),

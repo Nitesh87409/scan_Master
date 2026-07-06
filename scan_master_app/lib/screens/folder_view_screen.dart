@@ -151,19 +151,14 @@ class _FolderViewScreenState extends State<FolderViewScreen> {
     final zipFile = File('${tempDir.path}/$folderName.zip');
     
     try {
-      final archive = Archive();
+      final zipEncoder = ZipFileEncoder();
+      zipEncoder.create(zipFile.path);
       for (final file in _files) {
-        final fileName = file.path.split(Platform.pathSeparator).last;
-        final bytes = await File(file.path).readAsBytes();
-        archive.addFile(ArchiveFile(fileName, bytes.length, bytes));
+        zipEncoder.addFile(File(file.path));
       }
-      
-      final zipEncoder = ZipEncoder();
-      final zipBytes = zipEncoder.encode(archive);
-      if (zipBytes != null) {
-        await zipFile.writeAsBytes(zipBytes);
-        await Share.shareXFiles([XFile(zipFile.path)], text: 'Shared $folderName from Scan Master');
-      }
+      zipEncoder.close();
+
+      await Share.shareXFiles([XFile(zipFile.path)], text: 'Shared $folderName from Scan Master');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

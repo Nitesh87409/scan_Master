@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:open_filex/open_filex.dart';
@@ -150,7 +151,11 @@ class _ViewerScreenState extends State<ViewerScreen> {
             });
             await Future.delayed(const Duration(milliseconds: 10));
             if (mounted) {
-              Navigator.of(context).pop();
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                SystemNavigator.pop();
+              }
             }
           }
         },

@@ -14,6 +14,8 @@ import '../screens/viewer_screen.dart';
 import '../screens/pdf_tools_screen.dart';
 
 class FileOptionsHelper {
+  static bool _isShowing = false;
+
   static Future<void> showFileOptions({
     required BuildContext context,
     required FileSystemEntity file,
@@ -21,10 +23,16 @@ class FileOptionsHelper {
     required VoidCallback onFileChanged,
     Future<void> Function()? onRemoveFromFolder,
   }) async {
+    if (_isShowing) return;
+    _isShowing = true;
+
     final isPdf = file.path.toLowerCase().endsWith('.pdf');
     final isPinned = await fileManager.isPinned(file.path);
     
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      _isShowing = false;
+      return;
+    }
 
     await AppAnimations.showPremiumBottomSheet(
       context: context,
@@ -187,6 +195,8 @@ class FileOptionsHelper {
         );
       },
     );
+
+    _isShowing = false;
   }
 
   static Future<void> _renameFile(
