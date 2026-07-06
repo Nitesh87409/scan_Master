@@ -2,6 +2,11 @@
 
 Ye file project ka detailed record rakhti hai. Har update, state change, aur event attachment yahan detail me log hoga.
 
+## [1.5.13+136] - 2026-07-06
+### Bug Fix (Minor): Missing Mounted Check in Vault Restore
+- **Fix Applied:** Added `if (!mounted) return;` inside `_moveToNormal()` in `vault_screen.dart` before calling `ScaffoldMessenger` to prevent "context from disposed widget" crashes if the user exits the screen before the async rename operation finishes.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.13+136.
+
 ## [1.5.12+135] - 2026-07-06
 ### Bug Fix: Vault Restore Failure
 - **Fix Applied:** Fixed an issue in `vault_screen.dart` where `_moveToNormal()` silently failed to restore files if the user didn't have any folders created yet. Swapped `_fileManager.getFolders()` logic with a direct call to `getApplicationDocumentsDirectory()`, ensuring files restore safely to the root directory regardless of folder states.

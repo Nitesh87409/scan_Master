@@ -68,11 +68,13 @@ class _VaultScreenState extends State<VaultScreen> {
       final newPath = '${mainDir.path}/$fileName';
       await (file as File).rename(newPath);
       
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Restored from Vault')),
       );
       _loadVaultFiles();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to restore file')),
       );
