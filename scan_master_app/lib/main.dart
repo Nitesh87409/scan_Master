@@ -13,7 +13,15 @@ import 'services/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
+import 'services/remote_config_service.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  debugPrint("Handling a background message: ${message.messageId}");
+}
 
 // Global smooth scrolling behavior
 class SmoothScrollBehavior extends ScrollBehavior {
@@ -39,6 +47,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // --- Global Industry-Level Error Handling (lightweight, no awaits) ---
   _setupErrorHandlers();
@@ -150,6 +160,10 @@ class _ScanMasterAppState extends State<ScanMasterApp> {
     // These run AFTER the first frame, so user already sees the UI
     await AdService.initialize();
     await NotificationService.initialize();
+    await RemoteConfigService.initialize();
+    
+    // Request FCM permission
+    await FirebaseMessaging.instance.requestPermission();
     
     final prefs = await SharedPreferences.getInstance();
     
