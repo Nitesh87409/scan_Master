@@ -551,7 +551,8 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     final pdfDoc = sf.PdfDocument();
     
     // Render each page to a raster image using the printing package
-    final pages = Printing.raster(inputFile.readAsBytesSync(), dpi: dpi);
+    final inputBytes = await inputFile.readAsBytes();
+    final pages = Printing.raster(inputBytes, dpi: dpi);
     
     await for (final page in pages) {
       if (_isCancelled) break;
