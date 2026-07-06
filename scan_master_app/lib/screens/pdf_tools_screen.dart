@@ -419,11 +419,11 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
         final pdf = Pdf();
         final outSink = await FileSink.create(File(attemptPath));
         try {
-          final handle = await pdf.edit(FileSource(_selectedFile!));
-          await handle.optimizeImages(quality: q, minSize: 50);
-          await handle.unembedStandardFonts();
-          await handle.save(outSink);
-          await handle.dispose();
+          await pdf.compress(
+            FileSource(_selectedFile!),
+            outSink,
+            imageQuality: q,
+          );
         } finally {
           await outSink.close();
           await pdf.dispose();
@@ -463,15 +463,19 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       }
 
       // No meaningful reduction
-      if (bestPath == null || bestSize >= originalSize) {
+      final percentSaved =
+          ((originalSize - bestSize) / originalSize * 100).round();
+          
+      if (bestPath == null || bestSize >= originalSize || percentSaved < 1) {
+        if (bestPath != null) {
+          try { await File(bestPath).delete(); } catch (_) {}
+        }
         _finishTask(AppStrings.compressFailed,
             error: AppStrings.compressAlreadyOptimized);
         return;
       }
 
       final compressedMB = bestSize / (1024 * 1024);
-      final percentSaved =
-          ((originalSize - bestSize) / originalSize * 100).round();
 
       String resultMessage;
       if (targetBytes != null && bestSize > targetBytes) {

@@ -122,7 +122,7 @@ class FileManagerService {
     }
   }
 
-  Future<String> _getUniqueFilePath(String targetDir, String fileName) async {
+  Future<String> getUniqueFilePath(String targetDir, String fileName) async {
     String name = fileName;
     String ext = '';
     final lastDotIndex = fileName.lastIndexOf('.');
@@ -154,7 +154,7 @@ class FileManagerService {
 
         final fileName = file.path.split(Platform.pathSeparator).last;
         final trashFileName = 'TRASH__${locationPrefix}__$fileName';
-        final uniquePath = await _getUniqueFilePath(trashDir.path, trashFileName);
+        final uniquePath = await getUniqueFilePath(trashDir.path, trashFileName);
         final newFile = await file.rename(uniquePath);
         await _updatePinnedPath(filePath, null); // Remove pin when trashed
         return newFile.path;
@@ -171,7 +171,7 @@ class FileManagerService {
       if (await file.exists()) {
         final vaultDir = await getVaultFolder();
         final fileName = file.path.split(Platform.pathSeparator).last;
-        final uniquePath = await _getUniqueFilePath(vaultDir.path, fileName);
+        final uniquePath = await getUniqueFilePath(vaultDir.path, fileName);
         final newFile = await file.rename(uniquePath);
         await _updatePinnedPath(filePath, null); // Remove pin when vaulted
         return newFile.path;
@@ -189,7 +189,7 @@ class FileManagerService {
         final trashDir = await getTrashFolder();
         final folderName = dir.path.split(Platform.pathSeparator).last;
         final trashFolderName = 'TRASH_DIR__ROOT__$folderName';
-        final uniquePath = await _getUniqueFilePath(trashDir.path, trashFolderName);
+        final uniquePath = await getUniqueFilePath(trashDir.path, trashFolderName);
         final newDir = await dir.rename(uniquePath);
         return newDir.path;
       }
@@ -326,7 +326,7 @@ class FileManagerService {
       final file = File(filePath);
       if (await file.exists()) {
         final fileName = file.path.split(Platform.pathSeparator).last;
-        final uniquePath = await _getUniqueFilePath(folderPath, fileName);
+        final uniquePath = await getUniqueFilePath(folderPath, fileName);
         final newFile = await file.rename(uniquePath);
         await _updatePinnedPath(filePath, newFile.path);
         return true;
@@ -344,7 +344,7 @@ class FileManagerService {
       if (await file.exists()) {
         final directory = await getApplicationDocumentsDirectory();
         final fileName = file.path.split(Platform.pathSeparator).last;
-        final uniquePath = await _getUniqueFilePath(directory.path, fileName);
+        final uniquePath = await getUniqueFilePath(directory.path, fileName);
         final newFile = await file.rename(uniquePath);
         await _updatePinnedPath(filePath, newFile.path);
         return true;

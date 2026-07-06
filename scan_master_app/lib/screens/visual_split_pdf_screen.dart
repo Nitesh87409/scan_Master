@@ -21,7 +21,10 @@ class _VisualSplitPdfScreenState extends State<VisualSplitPdfScreen> {
   final Map<int, ui.Image> _thumbnails = {};
   bool _isLoading = true;
   bool _isSplitting = false;
-  int _splitAfterIndex = -1;
+
+  // CHANGED: single int → Set of multiple split points
+  final Set<int> _splitPoints = {};
+
   String _progressText = "";
 
   @override
@@ -32,8 +35,10 @@ class _VisualSplitPdfScreenState extends State<VisualSplitPdfScreen> {
 
   @override
   void dispose() {
-    for (final image in _thumbnails.values) {
-      image.dispose();
+    // NOTE: this was already missing dispose for _document/_thumbnails
+    // in an earlier bug report — make sure this stays in place.
+    for (final img in _thumbnails.values) {
+      img.dispose();
     }
     _document?.dispose();
     super.dispose();
@@ -80,9 +85,12 @@ class _VisualSplitPdfScreenState extends State<VisualSplitPdfScreen> {
     }
   }
 
+  // CHANGED: now creates N+1 parts based on however many split points are selected
   Future<void> _executeSplit() async {
-    if (_document == null || _splitAfterIndex < 0 || _splitAfterIndex >= _document!.pages.length - 1) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a valid split point.')));
+    if (_document == null || _splitPoints.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select at least one split point.')),
+      );
       return;
     }
 
@@ -91,34 +99,49 @@ class _VisualSplitPdfScreenState extends State<VisualSplitPdfScreen> {
       _progressText = "Splitting PDF...";
     });
 
+    final List<String> createdPaths = [];
+
     try {
       final pdf = Pdf();
       final outputDir = await getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      
       final sourceBytes = await widget.file.readAsBytes();
-      final source = MemorySource(sourceBytes);
+      final totalPages = _document!.pages.length;
 
-      // Part 1
-      final path1 = '${outputDir.path}/scan_split1_$timestamp.pdf';
-      final sink1 = await FileSink.create(File(path1));
-      final pages1 = List.generate(_splitAfterIndex + 1, (index) => index);
-      await pdf.extractPages(source, sink1, pages: pages1);
-      await sink1.close();
+      // Sorted split points + the last page index, so we always close out the final part
+      final sortedPoints = _splitPoints.toList()..sort();
+      final boundaries = [...sortedPoints, totalPages - 1];
 
-      // Part 2
-      final path2 = '${outputDir.path}/scan_split2_$timestamp.pdf';
-      final sink2 = await FileSink.create(File(path2));
-      final pages2 = List.generate(_document!.pages.length - (_splitAfterIndex + 1), (index) => _splitAfterIndex + 1 + index);
-      await pdf.extractPages(source, sink2, pages: pages2);
-      await sink2.close();
+      int startPage = 0;
+      int partNumber = 1;
+
+      for (final splitAfter in boundaries) {
+        final source = MemorySource(sourceBytes); // fresh source per part
+        final path = '${outputDir.path}/scan_split${partNumber}_$timestamp.pdf';
+        final sink = await FileSink.create(File(path));
+
+        final pageCount = splitAfter - startPage + 1;
+        final pages = List.generate(pageCount, (i) => startPage + i);
+
+        await pdf.extractPages(source, sink, pages: pages);
+        await sink.close();
+
+        createdPaths.add(path);
+        startPage = splitAfter + 1;
+        partNumber++;
+      }
 
       await pdf.dispose();
 
-      if (mounted) {
-        Navigator.pop(context, true); // Success
-      }
+      if (mounted) Navigator.pop(context, true);
     } catch (e) {
+      // Clean up any partially-created files on failure
+      for (final path in createdPaths) {
+        try {
+          final f = File(path);
+          if (await f.exists()) await f.delete();
+        } catch (_) {}
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error splitting: $e')));
         setState(() => _isSplitting = false);
@@ -129,15 +152,17 @@ class _VisualSplitPdfScreenState extends State<VisualSplitPdfScreen> {
   @override
   Widget build(BuildContext context) {
     final fileName = widget.file.path.split(Platform.pathSeparator).last;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Split PDF'),
         actions: [
-          if (!_isLoading && _splitAfterIndex >= 0 && _splitAfterIndex < (_document?.pages.length ?? 0) - 1)
-            IconButton(
-              icon: const Icon(Icons.check),
+          // CHANGED: shows how many parts will be created
+          if (!_isLoading && _splitPoints.isNotEmpty)
+            TextButton.icon(
               onPressed: _isSplitting ? null : _executeSplit,
+              icon: const Icon(Icons.check),
+              label: Text('${_splitPoints.length + 1} parts'),
             ),
         ],
       ),
@@ -157,7 +182,11 @@ class _VisualSplitPdfScreenState extends State<VisualSplitPdfScreen> {
                           const Text('Selected File:', style: TextStyle(fontWeight: FontWeight.bold)),
                           Text(fileName, style: const TextStyle(fontSize: 14)),
                           const SizedBox(height: 8),
-                          const Text('Tap on a page to split the document AFTER it.', style: TextStyle(fontStyle: FontStyle.italic)),
+                          // CHANGED: updated instructions text
+                          const Text(
+                            'Tap on a page to mark a split point AFTER it. Tap multiple pages to split into more than 2 parts.',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
                         ],
                       ),
                     ),
@@ -173,15 +202,23 @@ class _VisualSplitPdfScreenState extends State<VisualSplitPdfScreen> {
                         itemCount: _document!.pages.length,
                         itemBuilder: (context, index) {
                           final hasImage = _thumbnails.containsKey(index);
-                          final isSelected = index == _splitAfterIndex;
+                          // CHANGED: check membership in the Set instead of equality with single int
+                          final isSelected = _splitPoints.contains(index);
                           final isLastPage = index == _document!.pages.length - 1;
-                          
+
                           return GestureDetector(
-                            onTap: isLastPage ? null : () {
-                              setState(() {
-                                _splitAfterIndex = index;
-                              });
-                            },
+                            // CHANGED: toggle add/remove instead of overwrite
+                            onTap: isLastPage
+                                ? null
+                                : () {
+                                    setState(() {
+                                      if (_splitPoints.contains(index)) {
+                                        _splitPoints.remove(index);
+                                      } else {
+                                        _splitPoints.add(index);
+                                      }
+                                    });
+                                  },
                             child: Stack(
                               clipBehavior: Clip.none,
                               children: [

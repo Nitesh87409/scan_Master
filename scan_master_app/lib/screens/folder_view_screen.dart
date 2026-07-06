@@ -154,9 +154,9 @@ class _FolderViewScreenState extends State<FolderViewScreen> {
       final zipEncoder = ZipFileEncoder();
       zipEncoder.create(zipFile.path);
       for (final file in _files) {
-        zipEncoder.addFile(File(file.path));
+        await zipEncoder.addFile(File(file.path));
       }
-      zipEncoder.close();
+      await zipEncoder.close();
 
       await Share.shareXFiles([XFile(zipFile.path)], text: 'Shared $folderName from Scan Master');
     } catch (e) {

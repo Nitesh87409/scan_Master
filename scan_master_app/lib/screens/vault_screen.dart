@@ -48,9 +48,16 @@ class _VaultScreenState extends State<VaultScreen> {
     if (!_isAuthenticated) return;
     setState(() => _isLoading = true);
     final vaultDir = await _fileManager.getVaultFolder();
-    final files = vaultDir.listSync().where((f) => f is File).toList();
+    final rawFiles = vaultDir.listSync().where((f) => f is File).toList();
     
-    files.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
+    final List<(FileSystemEntity, FileStat)> filesWithStats = [];
+    for (final file in rawFiles) {
+      try {
+        filesWithStats.add((file, file.statSync()));
+      } catch (_) {}
+    }
+    filesWithStats.sort((a, b) => b.$2.modified.compareTo(a.$2.modified));
+    final files = filesWithStats.map((f) => f.$1).toList();
     
     if (mounted) {
       setState(() {
@@ -65,7 +72,7 @@ class _VaultScreenState extends State<VaultScreen> {
       final mainDir = await getApplicationDocumentsDirectory();
 
       final fileName = file.path.split(Platform.pathSeparator).last;
-      final newPath = '${mainDir.path}/$fileName';
+      final newPath = await _fileManager.getUniqueFilePath(mainDir.path, fileName);
       await (file as File).rename(newPath);
       
       if (!mounted) return;

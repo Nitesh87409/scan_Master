@@ -187,9 +187,9 @@ class _FoldersScreenState extends State<FoldersScreen> {
       final zipEncoder = ZipFileEncoder();
       zipEncoder.create(zipFile.path);
       for (final file in files) {
-        zipEncoder.addFile(file);
+        await zipEncoder.addFile(file);
       }
-      zipEncoder.close();
+      await zipEncoder.close();
 
       await Share.shareXFiles([XFile(zipFile.path)], text: 'Shared $folderName from Scan Master');
     } catch (e) {

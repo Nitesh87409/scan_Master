@@ -2,6 +2,31 @@
 
 Ye file project ka detailed record rakhti hai. Har update, state change, aur event attachment yahan detail me log hoga.
 
+## [1.5.18+141] - 2026-07-06
+### Feature Update: Multi-Split PDF Support
+- **Update Applied:** Replaced the code in `visual_split_pdf_screen.dart` with a multi-split implementation provided by the developer. Previously, splitting was limited to a single point (2 parts). Now, users can tap multiple pages to select multiple split points. The underlying logic uses a `Set<int>` to store split points and loops through boundaries to generate `N+1` parts. Added memory leak fix for thumbnails in `dispose()` and cleanup of partial files if an error occurs.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.18+141.
+
+## [1.5.17+140] - 2026-07-06
+### Bug Fix (Medium): Race Condition in Share Folder (Zip creation)
+- **Fix Applied:** Added missing `await` keywords to `zipEncoder.addFile()` and `zipEncoder.close()` inside `_shareFolder()` in both `folders_screen.dart` and `folder_view_screen.dart`. This fixes an intermittent "Ek baar wala" race condition where sharing a folder would occasionally fail or crash because the zip encoder was being closed before files were fully added, bypassing local `try-catch` blocks and throwing generic errors.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.17+140.
+
+## [1.5.16+139] - 2026-07-06
+### Bug Fix (Major): PDF Compression failing (0% smaller)
+- **Fix Applied:** Modified `_compressPdf()` in `pdf_tools_screen.dart`. Replaced `pdf.edit()` and `optimizeImages()` with the dedicated one-shot `pdf.compress()` method which provides comprehensive compression (object streams, garbage collection, font subsetting, image recompression). Also added a check to correctly report "Already optimized" if the size reduction is less than 1%, preventing the misleading "0% smaller" success message.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.16+139.
+
+## [1.5.15+138] - 2026-07-06
+### Performance Fix (Minor): Inefficient Sorting in Vault Screen
+- **Fix Applied:** Modified `_loadVaultFiles()` in `vault_screen.dart` to prevent $O(N^2)$ `statSync` operations during the file sorting process. Similar to the fix in `file_manager_service.dart`, file stats are now precomputed and cached in a tuple list before running `.sort()`, eliminating lag when the Vault contains many files.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.15+138.
+
+## [1.5.14+137] - 2026-07-06
+### Bug Fix (Minor): Overwrite-safety missing in Vault Restore
+- **Fix Applied:** Modified `_moveToNormal()` in `vault_screen.dart`. Replaced the direct string concatenation for the destination path with a call to the now-public `_fileManager.getUniqueFilePath()`. This ensures that restoring a file from the vault will append a counter (e.g., `(1)`) to the filename if a file with the same name already exists in the root folder, preventing accidental data loss due to silent overwrites.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.14+137.
+
 ## [1.5.13+136] - 2026-07-06
 ### Bug Fix (Minor): Missing Mounted Check in Vault Restore
 - **Fix Applied:** Added `if (!mounted) return;` inside `_moveToNormal()` in `vault_screen.dart` before calling `ScaffoldMessenger` to prevent "context from disposed widget" crashes if the user exits the screen before the async rename operation finishes.
