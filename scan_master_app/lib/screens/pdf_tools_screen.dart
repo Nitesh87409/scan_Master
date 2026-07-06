@@ -10,6 +10,7 @@ import 'package:printing/printing.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:archive/archive_io.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as sf;
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'viewer_screen.dart';
 import '../widgets/file_thumbnail.dart';
 import '../utils/file_options_helper.dart';
@@ -200,7 +201,8 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       }
       
       _finishTask(AppStrings.mergeSuccess, filePath: mergedFilePath);
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, fatal: false, reason: 'Merge PDF failed');
       _finishTask(AppStrings.mergeSuccess, error: e.toString());
     }
   }
@@ -489,7 +491,8 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       }
 
       _finishTask(resultMessage, filePath: bestPath);
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, fatal: false, reason: 'Compress PDF failed');
       if (bestPath != null) {
         try { await File(bestPath).delete(); } catch (_) {}
       }
@@ -539,7 +542,8 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       await dir.delete(recursive: true);
       
       _finishTask('Exported $pageIndex images to ZIP', filePath: zipFilePath);
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, fatal: false, reason: 'Export to Images failed');
       _finishTask('Export Failed', error: e.toString());
     }
   }
@@ -597,7 +601,8 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       await sink.close();
       
       _finishTask('Text Extracted Successfully', filePath: textFilePath);
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, fatal: false, reason: 'Export to Text failed');
       _finishTask('Export Failed', error: e.toString());
     } finally {
       textRecognizer?.close();
@@ -688,7 +693,8 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       await File(outPath).writeAsBytes(outputBytes);
       
       _finishTask('Watermark added successfully', filePath: outPath);
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, fatal: false, reason: 'Watermark PDF failed');
       _finishTask('Failed to add watermark', error: e.toString());
     } finally {
       document?.dispose();
@@ -759,7 +765,8 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       }
       
       _finishTask(AppStrings.protectSuccess, filePath: protectedFilePath);
-    } catch (e) {
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, fatal: false, reason: 'Protect PDF failed');
       _finishTask(AppStrings.protectSuccess, error: e.toString());
     }
   }

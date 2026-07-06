@@ -148,7 +148,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.privacy_tip),
             title: const Text('Privacy Policy'),
-            onTap: () {},
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Privacy Policy'),
+                  content: const Text(
+                    'Scan Master automatically sends anonymous crash and error reports (device model, OS version, app version, and technical error details) to help us fix bugs. No document content, file names, or personal files are ever included in these reports.\n\nAll your scanned documents and files remain private and are processed locally on your device.'
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

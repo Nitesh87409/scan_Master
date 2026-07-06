@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "302398516430",
+    "project_id": "scanmaster-55e57",
+    "storage_bucket": "scanmaster-55e57.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302398516430:android:d84d03fea8b82b9483749f",
+        "android_client_info": {
+          "package_name": "com.scanmaster.scan_master_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvk1keYhja6AMac-Z71jEN1b8CaZOrLXY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,7 +2,7 @@ name: scan_master_app
 description: "A premium Material 3 Document Scanner and PDF Toolkit app"
 publish_to: 'none'
 
-version: 1.5.18+141
+version: 1.5.21+144
 
 environment:
   sdk: ^3.12.2
@@ -42,6 +42,10 @@ dependencies:
   quick_actions: ^1.1.0
   syncfusion_flutter_pdf: ^33.2.15
   local_auth: ^3.0.1
+  firebase_core: ^4.11.0
+  firebase_crashlytics: ^5.2.4
+  firebase_performance: ^0.11.4+3
+  firebase_analytics: ^12.4.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

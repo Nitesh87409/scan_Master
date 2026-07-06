@@ -10,6 +10,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'services/ad_service.dart';
 import 'services/file_manager_service.dart';
 import 'services/notification_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'firebase_options.dart';
 
 // Global smooth scrolling behavior
 class SmoothScrollBehavior extends ScrollBehavior {
@@ -29,9 +33,13 @@ final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<Sca
 // Global key for Navigator
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   // --- Global Industry-Level Error Handling (lightweight, no awaits) ---
   _setupErrorHandlers();
 
@@ -71,6 +79,7 @@ void _setupErrorHandlers() {
 
   // 2. Uncaught Asynchronous Errors
   PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     debugPrint('Async error caught globally: $error');
     rootScaffoldMessengerKey.currentState?.showSnackBar(
       const SnackBar(
@@ -82,8 +91,14 @@ void _setupErrorHandlers() {
   };
 
   // 3. Standard Flutter framework errors
+  final originalOnError = FlutterError.onError;
   FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
+    FirebaseCrashlytics.instance.recordFlutterError(details);
+    if (originalOnError != null) {
+      originalOnError(details);
+    } else {
+      FlutterError.presentError(details);
+    }
     debugPrint('Flutter error caught: ${details.exception}');
   };
 }
@@ -194,6 +209,9 @@ class _ScanMasterAppState extends State<ScanMasterApp> {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: currentMode,
+          navigatorObservers: [
+            FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+          ],
           home: FutureBuilder<List<SharedMediaFile>>(
             future: _initialMediaFuture,
             builder: (context, snapshot) {
