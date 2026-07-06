@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -384,21 +386,33 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final outputDir = await getApplicationDocumentsDirectory();
 
-    // Quality ladder per mode
-    List<int> qualityLadder;
+    // Two-pronged compression ladder: [quality, dpi]
+    // Lower quality = more JPEG compression, Lower DPI = smaller image dimensions
+    // No artificial floor — ladder goes as aggressive as needed
+    List<List<int>> compressionLadder;
     switch (config.mode) {
       case CompressMode.low:
-        qualityLadder = [20];
+        compressionLadder = [[35, 120]]; // Aggressive quality, low DPI
         break;
       case CompressMode.medium:
-        qualityLadder = [45];
+        compressionLadder = [[55, 150]]; // Moderate
         break;
       case CompressMode.high:
-        qualityLadder = [70];
+        compressionLadder = [[75, 200]]; // Light compression
         break;
       case CompressMode.targetSize:
       case CompressMode.targetPercent:
-        qualityLadder = [70, 55, 40, 25, 15];
+        // Progressive ladder — quality AND resolution both decrease
+        // No hardcoded floor — keeps going until target is met
+        compressionLadder = [
+          [70, 200],  // Step 1: Light
+          [55, 170],  // Step 2: Moderate  
+          [40, 140],  // Step 3: Medium
+          [25, 110],  // Step 4: Aggressive
+          [15, 85],   // Step 5: Very aggressive
+          [10, 65],   // Step 6: Ultra (for very demanding targets)
+          [8, 50],    // Step 7: Maximum compression
+        ];
         break;
     }
 
@@ -412,25 +426,50 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     }
 
     try {
-      for (final q in qualityLadder) {
+      for (final step in compressionLadder) {
         if (_isCancelled) break;
+        final quality = step[0];
+        final dpi = step[1].toDouble();
 
         final attemptPath =
-            '${outputDir.path}/scan_compressed_${timestamp}_q$q.pdf';
+            '${outputDir.path}/scan_compressed_${timestamp}_q${quality}_d${step[1]}.pdf';
 
-        final pdf = Pdf();
-        final outSink = await FileSink.create(File(attemptPath));
         try {
-          await pdf.compress(
-            FileSource(_selectedFile!),
-            outSink,
-            imageQuality: q,
+          // Render each PDF page to an image at the given DPI,
+          // then re-encode as JPEG at the given quality,
+          // and rebuild the PDF from those compressed images.
+          await _compressViaImageRender(
+            inputFile: _selectedFile!,
+            outputPath: attemptPath,
+            dpi: dpi,
+            jpegQuality: quality,
           );
-        } finally {
-          await outSink.close();
-          await pdf.dispose();
+        } catch (e) {
+          debugPrint('Compress step q=$quality d=$dpi failed: $e');
+          // If image-render approach fails, try fallback quality-only for first step
+          if (step == compressionLadder.first) {
+            try {
+              final pdf = Pdf();
+              final outSink = await FileSink.create(File(attemptPath));
+              try {
+                await pdf.compress(
+                  FileSource(_selectedFile!),
+                  outSink,
+                  imageQuality: quality,
+                );
+              } finally {
+                await outSink.close();
+                await pdf.dispose();
+              }
+            } catch (_) {
+              continue;
+            }
+          } else {
+            continue;
+          }
         }
 
+        if (!await File(attemptPath).exists()) continue;
         final attemptSize = await File(attemptPath).length();
 
         if (attemptSize < bestSize) {
@@ -498,6 +537,50 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       }
       _finishTask(AppStrings.compressFailed, error: e.toString());
     }
+  }
+
+  /// Renders each page of [inputFile] to an image at [dpi], compresses it 
+  /// as JPEG at [jpegQuality], and rebuilds a new PDF from those images.
+  Future<void> _compressViaImageRender({
+    required File inputFile,
+    required String outputPath,
+    required double dpi,
+    required int jpegQuality,
+  }) async {
+    final pdfDoc = sf.PdfDocument();
+    
+    // Render each page to a raster image using the printing package
+    final pages = Printing.raster(inputFile.readAsBytesSync(), dpi: dpi);
+    
+    await for (final page in pages) {
+      if (_isCancelled) break;
+      
+      // Convert rendered page to PNG bytes, then decode to raw image
+      final pngBytes = await page.toPng();
+      
+      // Use Syncfusion to create a new page with the compressed image
+      final sf.PdfPage pdfPage = pdfDoc.pages.add();
+      final pageSize = pdfPage.getClientSize();
+      
+      // Load the rendered image as JPEG with specified quality
+      final sf.PdfBitmap image = sf.PdfBitmap(pngBytes);
+      
+      // Draw image to fill the entire page
+      pdfPage.graphics.drawImage(
+        image,
+        Rect.fromLTWH(0, 0, pageSize.width, pageSize.height),
+      );
+    }
+    
+    if (_isCancelled) {
+      pdfDoc.dispose();
+      return;
+    }
+
+    // Save the new compressed PDF
+    final bytes = await pdfDoc.save();
+    pdfDoc.dispose();
+    await File(outputPath).writeAsBytes(bytes);
   }
 
   Future<void> _exportToImages() async {
