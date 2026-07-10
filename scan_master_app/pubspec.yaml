@@ -2,7 +2,7 @@ name: scan_master_app
 description: "A premium Material 3 Document Scanner and PDF Toolkit app"
 publish_to: 'none'
 
-version: 1.5.26+149
+version: 1.5.38+161
 
 environment:
   sdk: ^3.12.2
@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 
   cupertino_icons: ^1.0.8
   camera: ^0.12.0+1
@@ -31,7 +34,7 @@ dependencies:
   gal: ^2.3.2
   package_info_plus: ^9.0.1
   shared_preferences: ^2.5.5
-  url_launcher: ^6.3.1
+  url_launcher: ^6.3.2
   archive: ^4.0.9
   pro_image_editor: ^13.0.0
   flutter_local_notifications: ^22.0.1
@@ -49,6 +52,7 @@ dependencies:
   firebase_in_app_messaging: ^0.9.2+4
   firebase_messaging: ^16.4.1
   firebase_remote_config: ^6.5.3
+  workmanager: ^0.9.0+3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -56,10 +60,14 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
 
 flutter:
+  generate: true
   uses-material-design: true
 
 flutter_launcher_icons:
   android: true
   ios: true
+  remove_alpha_ios: true
   image_path: "assets/logo.png"
   min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/logo.png"

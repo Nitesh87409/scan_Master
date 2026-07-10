@@ -3,19 +3,22 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'core/theme.dart';
-import 'screens/home_screen.dart';
-import 'screens/viewer_screen.dart';
+import 'package:scan_master_app/l10n/app_localizations.dart';
+import 'package:scan_master_app/core/theme.dart';
+import 'package:scan_master_app/features/home/screens/home_screen.dart';
+import 'package:scan_master_app/features/viewer/screens/viewer_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'services/ad_service.dart';
-import 'services/file_manager_service.dart';
-import 'services/notification_service.dart';
+import 'package:scan_master_app/services/ad_service.dart';
+import 'package:scan_master_app/services/file_manager_service.dart';
+import 'package:scan_master_app/services/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'firebase_options.dart';
-import 'services/remote_config_service.dart';
+import 'package:scan_master_app/firebase_options.dart';
+import 'package:scan_master_app/services/remote_config_service.dart';
+import 'package:scan_master_app/core/app_config.dart';
+import 'package:scan_master_app/services/tester_reminder_service.dart'; // Remove after testing
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -34,6 +37,9 @@ class SmoothScrollBehavior extends ScrollBehavior {
 
 // Global notifier for Theme
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.system);
+
+// Global notifier for Locale
+final ValueNotifier<Locale?> localeNotifier = ValueNotifier(null);
 
 // Global key for Scafford Messenger
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -68,17 +74,17 @@ void _setupErrorHandlers() {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 64),
-              const SizedBox(height: 16),
-              const Text(
+              Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 64),
+              SizedBox(height: 16),
+              Text(
                 'Something went wrong',
                 style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Text(
                 kDebugMode ? details.exceptionAsString() : 'An unexpected error occurred. Please try restarting the app.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
             ],
           ),
@@ -92,7 +98,7 @@ void _setupErrorHandlers() {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     debugPrint('Async error caught globally: $error');
     rootScaffoldMessengerKey.currentState?.showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text('An unexpected error occurred. We are looking into it.'),
         backgroundColor: Colors.redAccent,
       ),
@@ -160,7 +166,12 @@ class _ScanMasterAppState extends State<ScanMasterApp> {
     // These run AFTER the first frame, so user already sees the UI
     await AdService.initialize();
     await NotificationService.initialize();
-    await RemoteConfigService.initialize();
+    await AppConfig.initialize(); // Load Firebase Remote Config values
+    await RemoteConfigService.initialize(); // Check for updates
+    
+    // Tester Reminder — remove after closed testing
+    await TesterReminderService.initialize();
+    TesterReminderService.markAppOpened();
     
     // Request FCM permission
     await FirebaseMessaging.instance.requestPermission();
@@ -170,6 +181,12 @@ class _ScanMasterAppState extends State<ScanMasterApp> {
     // Load and apply saved theme
     final savedThemeIndex = prefs.getInt('theme_mode') ?? 0;
     themeNotifier.value = ThemeMode.values[savedThemeIndex];
+
+    // Load and apply saved language
+    final savedLanguage = prefs.getString('app_language');
+    if (savedLanguage != null && savedLanguage.isNotEmpty) {
+      localeNotifier.value = Locale(savedLanguage);
+    }
     
     // Run trash cleanup
     final retentionDays = prefs.getInt('trash_retention_days') ?? 30;
@@ -214,49 +231,68 @@ class _ScanMasterAppState extends State<ScanMasterApp> {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeNotifier,
       builder: (_, ThemeMode currentMode, __) {
-        return MaterialApp(
-          navigatorKey: navigatorKey,
-          scaffoldMessengerKey: rootScaffoldMessengerKey,
-          title: 'Scan Master',
-          debugShowCheckedModeBanner: false,
-          scrollBehavior: const SmoothScrollBehavior(),
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: currentMode,
-          navigatorObservers: [
-            FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
-          ],
-          home: FutureBuilder<List<SharedMediaFile>>(
-            future: _initialMediaFuture,
-            builder: (context, snapshot) {
-              // While intent data is loading, show a minimal loading screen
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Scaffold(
-                  backgroundColor: currentMode == ThemeMode.dark ? Colors.black : Colors.white,
-                  body: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-              // If intent has media, render ViewerScreen DIRECTLY (no HomeScreen flash)
-              final media = snapshot.data;
-              if (media != null && media.isNotEmpty) {
-                try {
-                  String path = media.first.path;
-                  if (path.startsWith('file://')) {
-                    path = Uri.parse(path).toFilePath();
+        return ValueListenableBuilder<Locale?>(
+          valueListenable: localeNotifier,
+          builder: (_, Locale? currentLocale, __) {
+            return MaterialApp(
+              navigatorKey: navigatorKey,
+              scaffoldMessengerKey: rootScaffoldMessengerKey,
+              onGenerateTitle: (context) => AppLocalizations.of(context)!.appName,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: currentLocale,
+              localeResolutionCallback: (deviceLocale, supportedLocales) {
+                if (currentLocale != null) return currentLocale;
+                if (deviceLocale != null) {
+                  for (var locale in supportedLocales) {
+                    if (locale.languageCode == deviceLocale.languageCode) {
+                      return deviceLocale;
+                    }
                   }
-                  if (File(path).existsSync()) {
-                    return ViewerScreen(file: File(path));
-                  }
-                } catch (e) {
-                  debugPrint("Malformed initial intent path: $e");
                 }
-              }
-              // No intent — show HomeScreen normally
-              return const HomeScreen();
-            },
-          ),
+                return const Locale('en', ''); // Default fallback
+              },
+              debugShowCheckedModeBanner: false,
+              scrollBehavior: const SmoothScrollBehavior(),
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: currentMode,
+              navigatorObservers: [
+                FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+              ],
+              home: FutureBuilder<List<SharedMediaFile>>(
+                future: _initialMediaFuture,
+                builder: (context, snapshot) {
+                  // While intent data is loading, show a minimal loading screen
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Scaffold(
+                      backgroundColor: currentMode == ThemeMode.dark ? Colors.black : Colors.white,
+                      body: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  // If intent has media, render ViewerScreen DIRECTLY (no HomeScreen flash)
+                  final media = snapshot.data;
+                  if (media != null && media.isNotEmpty) {
+                    try {
+                      String path = media.first.path;
+                      if (path.startsWith('file://')) {
+                        path = Uri.parse(path).toFilePath();
+                      }
+                      if (File(path).existsSync()) {
+                        return ViewerScreen(file: File(path));
+                      }
+                    } catch (e) {
+                      debugPrint("Malformed initial intent path: $e");
+                    }
+                  }
+                  // No intent — show HomeScreen normally
+                  return const HomeScreen();
+                },
+              ),
+            );
+          },
         );
       },
     );

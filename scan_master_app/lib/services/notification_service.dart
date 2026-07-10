@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:open_filex/open_filex.dart';
-import '../main.dart';
-import '../screens/viewer_screen.dart';
+import 'package:scan_master_app/main.dart';
+import 'package:scan_master_app/features/viewer/screens/viewer_screen.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();

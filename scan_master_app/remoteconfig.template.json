@@ -1,0 +1,220 @@
+{
+  "parameters": {
+    "ads_enabled": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "analytics_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ocr_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "qr_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "signature_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "vault_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "compress_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "watermark_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "export_images_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "export_text_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "protect_pdf_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "admob_banner_android": {
+      "defaultValue": {
+        "value": "ca-app-pub-3940256099942544/6300978111"
+      },
+      "valueType": "STRING"
+    },
+    "admob_banner_ios": {
+      "defaultValue": {
+        "value": "ca-app-pub-3940256099942544/2934735716"
+      },
+      "valueType": "STRING"
+    },
+    "admob_interstitial_android": {
+      "defaultValue": {
+        "value": "ca-app-pub-3940256099942544/1033173712"
+      },
+      "valueType": "STRING"
+    },
+    "admob_interstitial_ios": {
+      "defaultValue": {
+        "value": "ca-app-pub-3940256099942544/4411468910"
+      },
+      "valueType": "STRING"
+    },
+    "developer_name": {
+      "defaultValue": {
+        "value": "Nitesh"
+      },
+      "valueType": "STRING"
+    },
+    "play_store_url": {
+      "defaultValue": {
+        "value": "https://play.google.com/store/apps/details?id=com.scanmaster.scan_master_app"
+      },
+      "valueType": "STRING"
+    },
+    "amazon_store_url": {
+      "defaultValue": {
+        "value": "https://www.amazon.com/gp/mas/dl/android?p=com.scanmaster.scan_master_app"
+      },
+      "valueType": "STRING"
+    },
+    "play_store_developer_page": {
+      "defaultValue": {
+        "value": "https://play.google.com/store/apps/developer?id=Nitesh"
+      },
+      "valueType": "STRING"
+    },
+    "amazon_developer_page": {
+      "defaultValue": {
+        "value": "https://www.amazon.com/s?rh=p_4:Nitesh"
+      },
+      "valueType": "STRING"
+    },
+    "latest_app_version": {
+      "defaultValue": {
+        "value": "1.0.0"
+      },
+      "valueType": "STRING"
+    },
+    "update_url": {
+      "defaultValue": {
+        "value": "https://play.google.com/store/apps/details?id=com.scanmaster.scan_master_app"
+      },
+      "valueType": "STRING"
+    },
+    "force_update_required": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "show_announcement": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "announcement_title": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "announcement_message": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "announcement_action_url": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "maintenance_mode": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "maintenance_message": {
+      "defaultValue": {
+        "value": "App is under maintenance. Please try again later."
+      },
+      "valueType": "STRING"
+    },
+    "privacy_policy_url": {
+      "defaultValue": {
+        "value": "https://docs.google.com/document/d/1GhSOcrpymsv1XZvCXgzW1YQWlrrCpNiBy2dc2eBW8hU/edit?usp=sharing"
+      },
+      "valueType": "STRING"
+    },
+    "terms_of_service_url": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "testing_reminder_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_home_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_pdf_tools_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_viewer_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_settings_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    }
+  }
+}

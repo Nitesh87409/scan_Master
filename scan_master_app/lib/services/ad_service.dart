@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:scan_master_app/core/app_config.dart';
 
 class AdService {
   static InterstitialAd? _interstitialAd;
   static bool _isInterstitialAdLoaded = false;
-  static const bool adsEnabled = false; // Ads completely blocked for now
+  static bool get adsEnabled => AppConfig.adsEnabled;
 
   static Future<void> initialize() async {
     if (!adsEnabled) return;
@@ -17,8 +18,8 @@ class AdService {
     if (!adsEnabled) return;
     InterstitialAd.load(
       adUnitId: Platform.isAndroid 
-          ? 'ca-app-pub-3940256099942544/1033173712' // Test ID Android
-          : 'ca-app-pub-3940256099942544/4411468910', // Test ID iOS
+          ? AppConfig.admobInterstitialAndroid
+          : AppConfig.admobInterstitialIos,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
@@ -53,7 +54,9 @@ class AdService {
 }
 
 class BannerAdWidget extends StatefulWidget {
-  const BannerAdWidget({super.key});
+  final bool? isEnabled;
+  
+  const BannerAdWidget({super.key, this.isEnabled});
 
   @override
   State<BannerAdWidget> createState() => _BannerAdWidgetState();
@@ -70,11 +73,12 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   }
 
   void _loadBannerAd() {
-    if (!AdService.adsEnabled) return;
+    final shouldShow = widget.isEnabled ?? AdService.adsEnabled;
+    if (!shouldShow || !AdService.adsEnabled) return;
     _bannerAd = BannerAd(
       adUnitId: Platform.isAndroid 
-          ? 'ca-app-pub-3940256099942544/6300978111' 
-          : 'ca-app-pub-3940256099942544/2934735716',
+          ? AppConfig.admobBannerAndroid
+          : AppConfig.admobBannerIos,
       request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
@@ -98,7 +102,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!AdService.adsEnabled) return const SizedBox.shrink();
+    final shouldShow = widget.isEnabled ?? AdService.adsEnabled;
+    if (!shouldShow || !AdService.adsEnabled) return SizedBox.shrink();
     if (_isLoaded && _bannerAd != null) {
       return Align(
         alignment: Alignment.bottomCenter,
@@ -109,6 +114,6 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
         ),
       );
     }
-    return const SizedBox(height: 50); // Ad space placeholder
+    return SizedBox(height: 50); // Ad space placeholder
   }
 }

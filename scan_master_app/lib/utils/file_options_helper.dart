@@ -5,13 +5,13 @@ import 'package:share_plus/share_plus.dart';
 import 'package:gal/gal.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
-import '../services/file_manager_service.dart';
-import '../services/auth_service.dart';
-import '../core/animations.dart';
-import '../constants/app_strings.dart';
-import '../constants/document_filters.dart';
-import '../screens/viewer_screen.dart';
-import '../screens/pdf_tools_screen.dart';
+import 'package:scan_master_app/services/file_manager_service.dart';
+import 'package:scan_master_app/services/auth_service.dart';
+import 'package:scan_master_app/core/animations.dart';
+import 'package:scan_master_app/constants/document_filters.dart';
+import 'package:scan_master_app/features/viewer/screens/viewer_screen.dart';
+import 'package:scan_master_app/features/pdf_tools/screens/pdf_tools_screen.dart';
+import 'package:scan_master_app/l10n/app_localizations.dart';
 
 class FileOptionsHelper {
   static bool _isShowing = false;
@@ -43,8 +43,8 @@ class FileOptionsHelper {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.open_in_new, color: Colors.green),
-                title: const Text('Open'),
+                leading: Icon(Icons.open_in_new, color: Colors.green),
+                title: Text('Open'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   Navigator.push(
@@ -63,16 +63,16 @@ class FileOptionsHelper {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.edit, color: Colors.orange),
-                title: const Text('Rename'),
+                leading: Icon(Icons.edit, color: Colors.orange),
+                title: Text('Rename'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   _renameFile(context, file, fileManager, onFileChanged);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.drive_file_move, color: Colors.indigo),
-                title: const Text(AppStrings.actionMoveToFolder),
+                leading: Icon(Icons.drive_file_move, color: Colors.indigo),
+                title: Text(AppLocalizations.of(context)!.actionMoveToFolder),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   _moveToFolder(context, file, fileManager, onFileChanged);
@@ -80,8 +80,8 @@ class FileOptionsHelper {
               ),
               if (onRemoveFromFolder != null)
                 ListTile(
-                  leading: const Icon(Icons.outbox, color: Colors.orange),
-                  title: const Text('Remove from Folder'),
+                  leading: Icon(Icons.outbox, color: Colors.orange),
+                  title: Text('Remove from Folder'),
                   onTap: () async {
                     Navigator.pop(bottomSheetContext);
                     await onRemoveFromFolder();
@@ -89,8 +89,8 @@ class FileOptionsHelper {
                 ),
               if (!isPdf)
                 ListTile(
-                  leading: const Icon(Icons.save_alt, color: Colors.purple),
-                  title: const Text('Save to Gallery'),
+                  leading: Icon(Icons.save_alt, color: Colors.purple),
+                  title: Text('Save to Gallery'),
                   onTap: () async {
                     Navigator.pop(bottomSheetContext);
                     try {
@@ -99,7 +99,7 @@ class FileOptionsHelper {
                       await Gal.putImage(file.path);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Saved to Gallery!')),
+                          SnackBar(content: Text('Saved to Gallery!')),
                         );
                       }
                     } catch (e) {
@@ -113,8 +113,8 @@ class FileOptionsHelper {
                 ),
               if (isPdf)
                 ListTile(
-                  leading: const Icon(Icons.build, color: Colors.teal),
-                  title: const Text('PDF Tools'),
+                  leading: Icon(Icons.build, color: Colors.teal),
+                  title: Text('PDF Tools'),
                   onTap: () {
                     Navigator.pop(bottomSheetContext);
                     Navigator.push(
@@ -129,24 +129,24 @@ class FileOptionsHelper {
                 )
               else
                 ListTile(
-                  leading: const Icon(Icons.build, color: Colors.teal),
-                  title: const Text('Edit Image'),
+                  leading: Icon(Icons.build, color: Colors.teal),
+                  title: Text('Edit Image'),
                   onTap: () {
                     Navigator.pop(bottomSheetContext);
                     _editImage(context, file, onFileChanged);
                   },
                 ),
               ListTile(
-                leading: const Icon(Icons.share, color: Colors.blue),
-                title: const Text('Share'),
+                leading: Icon(Icons.share, color: Colors.blue),
+                title: Text('Share'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   Share.shareXFiles([XFile(file.path)], text: 'Shared from Scan Master');
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.security, color: Colors.deepPurple),
-                title: const Text('Move to Vault'),
+                leading: Icon(Icons.security, color: Colors.deepPurple),
+                title: Text('Move to Vault'),
                 onTap: () async {
                   Navigator.pop(bottomSheetContext);
                   final authenticated = await AuthService.authenticate();
@@ -155,15 +155,15 @@ class FileOptionsHelper {
                     onFileChanged();
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Moved to Secure Vault')),
+                        SnackBar(content: Text('Moved to Secure Vault')),
                       );
                     }
                   }
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(AppStrings.actionTrash),
+                leading: Icon(Icons.delete, color: Colors.red),
+                title: Text(AppLocalizations.of(context)!.actionTrash),
                 onTap: () async {
                   Navigator.pop(bottomSheetContext);
                   final messenger = ScaffoldMessenger.of(context);
@@ -173,10 +173,10 @@ class FileOptionsHelper {
                     messenger.clearSnackBars();
                     messenger.showSnackBar(
                       SnackBar(
-                        content: const Text(AppStrings.msgMovedToTrash),
+                        content: Text(AppLocalizations.of(context)!.msgMovedToTrash),
                         duration: const Duration(seconds: 2),
                         action: SnackBarAction(
-                          label: AppStrings.actionUndo,
+                          label: AppLocalizations.of(context)!.actionUndo,
                           onPressed: () async {
                             await fileManager.restoreFromTrash(trashPath);
                             onFileChanged();
@@ -212,15 +212,15 @@ class FileOptionsHelper {
     final newName = await AppAnimations.showPremiumDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Rename File'),
+        title: Text('Rename File'),
         content: TextField(
           controller: controller,
           decoration: const InputDecoration(hintText: 'New file name'),
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(dialogContext, controller.text), child: const Text('Rename')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext, controller.text), child: Text('Rename')),
         ],
       ),
     );
@@ -234,14 +234,14 @@ class FileOptionsHelper {
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Failed to rename file.')),
+              SnackBar(content: Text('Failed to rename file.')),
             );
           }
         }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('File already exists')),
+            SnackBar(content: Text('File already exists')),
           );
         }
       }
@@ -259,7 +259,7 @@ class FileOptionsHelper {
     if (folders.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No folders available. Create a folder first in the Folders tab.')),
+          SnackBar(content: Text('No folders available. Create a folder first in the Folders tab.')),
         );
       }
       return;
@@ -269,7 +269,7 @@ class FileOptionsHelper {
       final selectedFolder = await AppAnimations.showPremiumDialog<Directory>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Select Folder'),
+          title: Text('Select Folder'),
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
@@ -279,7 +279,7 @@ class FileOptionsHelper {
                 final folder = folders[index];
                 final folderName = folder.path.split(Platform.pathSeparator).last;
                 return ListTile(
-                  leading: const Icon(Icons.folder, color: Colors.amber),
+                  leading: Icon(Icons.folder, color: Colors.amber),
                   title: Text(folderName),
                   onTap: () => Navigator.pop(dialogContext, folder),
                 );
@@ -289,7 +289,7 @@ class FileOptionsHelper {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text(AppStrings.btnCancel),
+              child: Text(AppLocalizations.of(context)!.btnCancel),
             ),
           ],
         ),
@@ -307,7 +307,7 @@ class FileOptionsHelper {
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Failed to move file')),
+              SnackBar(content: Text('Failed to move file')),
             );
           }
         }
@@ -339,7 +339,7 @@ class FileOptionsHelper {
                 if (editorContext.mounted) {
                   Navigator.pop(editorContext);
                   ScaffoldMessenger.of(editorContext).showSnackBar(
-                    const SnackBar(content: Text('Image saved successfully!')),
+                    SnackBar(content: Text('Image saved successfully!')),
                   );
                 }
               } catch (e) {

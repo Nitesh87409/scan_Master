@@ -1,0 +1,60 @@
+name: Play Store Auto-Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play Store Track'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+
+jobs:
+  deploy:
+    name: Deploy to Google Play
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Build Android App Bundle (AAB)
+        run: flutter build appbundle --release
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+          working-directory: ./android
+
+      - name: Deploy to Play Store (Fastlane)
+        working-directory: ./android
+        env:
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          PLAY_STORE_TRACK: ${{ inputs.track }}
+        run: |
+          echo "$PLAY_STORE_JSON_KEY" > play_store_key.json
+          export PLAY_STORE_JSON_KEY_PATH="play_store_key.json"
+          bundle install
+          bundle exec fastlane deploy
+          rm play_store_key.json

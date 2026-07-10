@@ -1,40 +1,28 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../main.dart';
+import 'package:scan_master_app/main.dart';
+import 'package:scan_master_app/core/app_config.dart';
 
+/// Handles the in-app update check and dialog.
+/// All config values are read from AppConfig (which reads from Firebase).
 class RemoteConfigService {
-  static final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
-
   static Future<void> initialize() async {
-    try {
-      await _remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(minutes: 1),
-        minimumFetchInterval: const Duration(hours: 1), // Checks for updates every hour max
-      ));
-      
-      // Default values
-      await _remoteConfig.setDefaults(const {
-        "min_version": "1.0.0"
-      });
-
-      await _remoteConfig.fetchAndActivate();
-      
-      _checkForUpdate();
-    } catch (e) {
-      debugPrint("Remote Config init error: $e");
-    }
+    // AppConfig.initialize() is called separately in main.dart
+    // This just triggers the update check
+    _checkForUpdate();
   }
 
   static Future<void> _checkForUpdate() async {
-    final String minVersionString = _remoteConfig.getString("min_version");
+    final String latestVersionString = AppConfig.latestAppVersion;
+    final String updateUrl = AppConfig.updateUrl;
+    final bool forceUpdate = AppConfig.forceUpdateRequired;
+
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final String currentVersionString = packageInfo.version;
 
-    if (_isUpdateRequired(currentVersionString, minVersionString)) {
-      _showUpdateDialog();
+    if (_isUpdateRequired(currentVersionString, latestVersionString)) {
+      _showUpdateDialog(updateUrl, forceUpdate);
     }
   }
 
@@ -55,31 +43,35 @@ class RemoteConfigService {
     return false;
   }
 
-  static void _showUpdateDialog() {
+  static void _showUpdateDialog(String updateUrl, bool forceUpdate) {
     final context = navigatorKey.currentContext;
     if (context == null) return;
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Force update
+      barrierDismissible: !forceUpdate,
       builder: (context) {
         return PopScope(
-          canPop: false, // Prevent back button
+          canPop: !forceUpdate,
           child: AlertDialog(
-            title: const Text('Update Required'),
-            content: const Text(
-                'A new mandatory update is available. Please update the app to continue using Scan Master.'),
+            title: Text('Update Available'),
+            content: Text(forceUpdate
+                ? 'A new mandatory update is available. Please update the app to continue using Scan Master.'
+                : 'A new version of Scan Master is available. Would you like to update now?'),
             actions: [
+              if (!forceUpdate)
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Later'),
+                ),
               ElevatedButton(
                 onPressed: () async {
-                  // Replace with your app's actual Play Store link
-                  const url = 'https://play.google.com/store/apps/details?id=com.scanmaster.scan_master_app';
-                  final uri = Uri.parse(url);
+                  final uri = Uri.parse(updateUrl);
                   if (await canLaunchUrl(uri)) {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
                   }
                 },
-                child: const Text('Update Now'),
+                child: Text('Update Now'),
               ),
             ],
           ),

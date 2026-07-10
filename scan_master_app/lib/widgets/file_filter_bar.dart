@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../utils/file_filter_util.dart';
+import 'package:scan_master_app/utils/file_filter_util.dart';
 
 class FileFilterBar extends StatelessWidget {
   final FileFilterType currentFilter;

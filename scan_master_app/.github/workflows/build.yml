@@ -1,0 +1,58 @@
+name: Auto-Build & Firebase Updater
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  build_and_notify:
+    name: Build APKs & Notify Users
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Build Split APKs
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APKs as Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apks
+          path: build/app/outputs/flutter-apk/*-release.apk
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Node Dependencies
+        working-directory: ./scripts
+        run: npm install
+
+      - name: Update Firebase Remote Config (In-App Popup)
+        working-directory: ./scripts
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > firebase-service-account.json
+          npm run update-firebase
+          rm firebase-service-account.json

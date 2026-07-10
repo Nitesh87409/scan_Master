@@ -2,6 +2,93 @@
 
 Ye file project ka detailed record rakhti hai. Har update, state change, aur event attachment yahan detail me log hoga.
 
+## [1.5.38+161] - 2026-07-10
+### Feature Update: Configurable Banner Ads
+- **Test Banner Ads Integration:** Added test banner ads (`BannerAdWidget`) to all major screens: `HomeScreen`, `PdfToolsScreen`, `ViewerScreen`, and `SettingsScreen`.
+- **Remote Config Parameters:** Added screen-specific toggle parameters in `AppConfig` to remotely enable/disable ads per screen: `ads_home_screen_enabled`, `ads_pdf_tools_screen_enabled`, `ads_viewer_screen_enabled`, and `ads_settings_screen_enabled`.
+- **Refactoring:** Updated `BannerAdWidget` in `ad_service.dart` to accept an `isEnabled` property which checks the specific screen's Remote Config parameter alongside the global `ads_enabled` kill switch.
+- **Rule Compliance:** Ensured AGENTS.md rules are followed (dynamic parameters, version bump, and brain.md update).
+- **Version Bump:** `pubspec.yaml` updated to 1.5.38+161.
+
+## [1.5.28+151] - 2026-07-10
+### Feature Update: Full UI Localization (Auto Detect)
+- **Framework Native Localization:** Replaced static `AppStrings` with native Flutter `AppLocalizations` (`flutter_localizations` & `intl`).
+- **Auto Detect:** The app now automatically detects the device's default locale and renders the UI in that language instantly upon launch. If the language isn't supported, it defaults to English.
+- **Languages Added:** Complete internal UI translations added for English (`app_en.arb`), Hindi (`app_hi.arb`), and Bengali (`app_bn.arb`). More languages can be seamlessly added via `.arb` files.
+- **Rule Compliance:** Ensured AGENTS.md rules are followed (dynamic strings, version bump, and brain.md update).
+- **Version Bump:** `pubspec.yaml` updated to 1.5.28+151.
+
+## [1.5.27+150] - 2026-07-10
+### Feature Update: Extreme ASO (App Store Optimization)
+- **Manifest Label Override:** Updated `AndroidManifest.xml` to use a localized string reference (`@string/app_name_long`) for the backend application label (which is indexed by app stores) and a shorter name (`@string/app_name_short`) for the launcher activity label so the app name looks clean on the user's home screen.
+- **ASO Title Localization & Keyword Stuffing:** Created `strings.xml` resources for 11 different languages (English, Hindi, Spanish, French, German, Portuguese, Russian, Arabic, Japanese, Korean, Chinese). The `app_name_long` now includes top category keywords (like PDF Scanner, Document Creator, OCR, QR Reader) directly in the title, while maintaining the short brand name for the launcher icon.
+- **Rule Compliance:** Ensured AGENTS.md rules are followed (dynamic strings, ASO focus, version bump, and brain.md update).
+- **Version Bump:** `pubspec.yaml` updated to 1.5.27+150.
+
+## [1.5.26+149] - 2026-07-06
+### Fix: Remove Blocking I/O in PDF Compression
+- **Bug:** Used `readAsBytesSync()` before rendering, causing the UI to freeze on large files.
+- **Fix:** Switched to async `readAsBytes()`.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.26+149.
+
+## [1.5.25+148] - 2026-07-06
+### Critical Fix: jpegQuality Parameter Was Never Used
+- **Bug:** `_compressViaImageRender()` accepted `jpegQuality` param but used `page.toPng()` (lossless PNG) directly — quality axis had zero effect on compression.
+- **Fix:** Added `image` package import. Now PNG is decoded via `img.decodePng()` and re-encoded as JPEG via `img.encodeJpg(decoded, quality: jpegQuality)` before embedding in PDF.
+- **Impact:** Both compression axes (quality + DPI) now work together, enabling much smaller file sizes especially for aggressive targets.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.25+148.
+
+## [1.5.24+147] - 2026-07-06
+### Fix: PDF Compress — Resolution Downscaling + No Size Limits
+- **Two-Pronged Compression:** Replaced quality-only ladder with quality + DPI resolution downscaling. Each step now renders PDF pages to images at lower DPI and re-encodes as JPEG.
+- **No Hardcoded Floor:** Removed all artificial size limits. Compression ladder goes up to 7 progressive steps for demanding targets (e.g., 1MB → 400KB).
+- **New Helper:** Added `_compressViaImageRender()` method that uses `Printing.raster()` to render pages and `syncfusion_flutter_pdf` to rebuild compressed PDF.
+- **Fallback:** If image-render fails, falls back to original `pdf_manipulator.compress()` quality-only approach.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.24+147.
+
+## [1.5.23+146] - 2026-07-06
+### Feature Update: Firebase Cloud Messaging & Remote Config
+- **Integration Added:** Added `firebase_messaging` for push notifications and `firebase_remote_config` for mandatory update blocking.
+- **Modifications:** 
+  - Created `RemoteConfigService` to enforce `min_version` checks.
+  - Added FCM background handler and initialized messaging permissions in `main.dart`.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.23+146.
+
+## [1.5.22+145] - 2026-07-06
+### Feature Update: Firebase In-App Messaging
+- **Integration Added:** Added `firebase_in_app_messaging` for displaying targeted, contextual messages (pop-ups/banners) to active app users.
+- **Modifications:** Added package to `pubspec.yaml`. The SDK handles message fetching and display automatically without additional Dart initialization code.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.22+145.
+
+## [1.5.21+144] - 2026-07-06
+### Feature Update: Firebase Analytics & App Distribution
+- **Integration Added:** Added Firebase Analytics for tracking app engagement and screen views. Added Firebase App Distribution plugin for easy beta testing distribution.
+- **Modifications:**
+  - Added `firebase_analytics` to `pubspec.yaml`.
+  - Added `FirebaseAnalyticsObserver` to `navigatorObservers` in `MaterialApp` within `lib/main.dart` for automatic screen tracking.
+  - Added and applied `com.google.firebase.appdistribution` plugin in `android/build.gradle.kts` and `android/app/build.gradle.kts`.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.21+144.
+
+## [1.5.20+143] - 2026-07-06
+### Feature Update: Firebase Performance Monitoring
+- **Integration Added:** Added `firebase_performance` to monitor app startup time, frame rendering, and HTTP network requests.
+- **Modifications:**
+  - Added `firebase_performance` dependency to `pubspec.yaml`.
+  - Added the `com.google.firebase:perf-plugin` to `android/build.gradle.kts`.
+  - Applied the `com.google.firebase.firebase-perf` plugin in `android/app/build.gradle.kts`.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.20+143.
+
+## [1.5.19+142] - 2026-07-06
+### Feature Update: Firebase Crashlytics Integration
+- **Integration Added:** Integrated Firebase Crashlytics to automatically track and report app crashes and non-fatal errors.
+- **Modifications:**
+  - Added `firebase_core` and `firebase_crashlytics` to `pubspec.yaml`.
+  - Added Firebase Gradle plugins to `android/build.gradle.kts` and `android/app/build.gradle.kts`.
+  - Initialized Firebase in `main.dart` and injected Crashlytics recording into `FlutterError.onError` and `PlatformDispatcher.instance.onError` without removing existing error UI.
+  - Added non-fatal error logging for silent failures in `pdf_tools_screen.dart` (Merge, Compress, Export to Image/Text, Watermark, Protect).
+  - Updated the Privacy Policy dialog in `settings_screen.dart` to mention that anonymous crash reports are sent to help fix bugs.
+- **Version Bump:** `pubspec.yaml` updated to 1.5.19+142.
+
 ## [1.5.18+141] - 2026-07-06
 ### Feature Update: Multi-Split PDF Support
 - **Update Applied:** Replaced the code in `visual_split_pdf_screen.dart` with a multi-split implementation provided by the developer. Previously, splitting was limited to a single point (2 parts). Now, users can tap multiple pages to select multiple split points. The underlying logic uses a `Set<int>` to store split points and loops through boundaries to generate `N+1` parts. Added memory leak fix for thumbnails in `dispose()` and cleanup of partial files if an error occurs.
@@ -855,3 +942,65 @@ Ye file project ka detailed record rakhti hai. Har update, state change, aur eve
 - **Watermark Text Overflow Fix**: Updated _watermarkPdf in pdf_tools_screen.dart to use PdfStringFormat with wordWrap: true and proper bounding rects to prevent very long watermark text from being cut off.
 - **Stale Reference Fix**: Added wait file.exists() check in iewer_screen.dart to prevent crashes when the user attempts to share or print a file that has been deleted in the background.
 - **Rule Compliance**: AGENTS.md rules followed (version bump & brain.md log).
+
+## CI/CD Pipeline and Firebase Remote Config Auto-Update (2026-07-10)
+- Integrated Github Actions (`.github/workflows/build_and_deploy.yml`) to automatically build APK and AAB on pushes to `main`.
+- Configured Fastlane (`android/Gemfile`, `android/fastlane/Appfile`, `android/fastlane/Fastfile`) for automatic deployment to Google Play Store using `PLAY_STORE_JSON_KEY`.
+- Created a Node.js script (`scripts/update_firebase.js`) to automatically push the latest app version to Firebase Remote Config using `FIREBASE_SERVICE_ACCOUNT`.
+- Modified `RemoteConfigService` to fetch `latest_app_version`, `update_url`, and `force_update_required` to show an in-app update popup.
+- Added `dependabot.yml` to automate Flutter and GitHub actions dependencies updates.
+- Version bumped to 1.5.29+152.
+
+## Split CI/CD Architecture (2026-07-10)
+- Removed `build_and_deploy.yml`.
+- Created `flutter_build.yml` (Quality Checker: dart format, tests, basic apk).
+- Created `build.yml` (Auto-Build & Firebase: apk splits, artifacts, in-app update trigger via node script).
+- Created `deploy_play_store.yml` (Manual Deploy: workflow_dispatch with track selection, AAB generation, Fastlane).
+- Updated Fastfile to read `ENV['PLAY_STORE_TRACK']`.
+
+## Phase 1: Industry Checklist Quick Wins (2026-07-10)
+- Created `lib/core/app_config.dart`: Centralized AppConfig class with all AdMob IDs, store links, feature flags, privacy policy text, and default settings.
+- Created `lib/core/analytics_events.dart`: AnalyticsEvents helper class with named methods for every trackable user action (scan, gallery, merge, split, compress, protect, ocr, qr, signature, rate_us, more_apps, export, watermark, vault, language_change, theme_change).
+- Refactored `lib/services/ad_service.dart`: Now pulls all AdMob IDs and `adsEnabled` flag from AppConfig.
+- Refactored `lib/screens/settings_screen.dart`: All strings now use AppLocalizations. Store links use AppConfig. Added analytics ON/OFF toggle (SwitchListTile) wired to `FirebaseAnalytics.setAnalyticsCollectionEnabled()`. Theme and language changes now log analytics events.
+- Updated `lib/l10n/app_en.arb`, `app_hi.arb`, `app_bn.arb`: Added ~40 new localization keys for settings, home screen, and common UI elements.
+- Added analytics events for scan and gallery import in `home_screen.dart`.
+- Version bumped to 1.5.30+153.
+
+## Firebase Remote Config Control Panel (2026-07-10)
+- Rewrote `lib/core/app_config.dart` as a dynamic Firebase Remote Config powered control panel.
+- All values now use `FirebaseRemoteConfig.instance.getString/getBool()` with hardcoded fallback defaults.
+- Firebase Console Parameters: `ads_enabled`, `analytics_enabled`, `ocr_feature_enabled`, `qr_feature_enabled`, `signature_feature_enabled`, `vault_feature_enabled`, `compress_feature_enabled`, `watermark_feature_enabled`, `export_images_enabled`, `export_text_enabled`, `protect_pdf_enabled`, `maintenance_mode`, `maintenance_message`, `admob_banner_android`, `admob_banner_ios`, `admob_interstitial_android`, `admob_interstitial_ios`, `play_store_url`, `amazon_store_url`, `play_store_developer_page`, `amazon_developer_page`, `latest_app_version`, `update_url`, `force_update_required`, `privacy_policy_url`, `terms_of_service_url`, `privacy_policy_text`, `developer_name`, `show_announcement`, `announcement_title`, `announcement_message`, `announcement_action_url`.
+- Simplified `RemoteConfigService` to read from AppConfig instead of directly from Firebase.
+- Updated `main.dart` to call `AppConfig.initialize()` before `RemoteConfigService.initialize()`.
+- Changed `AdService.adsEnabled` from `const` to `static getter` for dynamic Firebase support.
+- Version bumped to 1.5.31+154.
+
+## Phase 2: Clean Architecture Restructure (2026-07-10)
+- Implemented Google/Meta standard "Feature-First" folder structure.
+- Created `lib/features/` and moved all 14 screens from `lib/screens/` to their respective feature folders (home, scanner, pdf_tools, folders, viewer, vault, trash, settings, signature, qr_toolkit, ocr).
+- Split the massive `pdf_tools_screen.dart` (48KB) into smaller, reusable UI widgets:
+  - `lib/features/pdf_tools/widgets/pdf_file_cards.dart` (`PdfFileCard`, `PdfEmptyFileCard`)
+  - `lib/features/pdf_tools/widgets/pdf_action_card.dart` (`PdfActionCard`)
+  - `lib/features/pdf_tools/widgets/pdf_processing_overlay.dart` (`PdfProcessingOverlay`)
+- Refactored `pdf_tools_screen.dart` to use these new modular widgets, shrinking the `build` method significantly.
+- Automated mass-update of all relative imports across the project to absolute `package:scan_master_app/...` imports to fix broken links.
+- `flutter analyze` passed with 0 compile errors.
+- Version bumped to 1.5.32+155.
+
+## Tester Reminder Notification System (2026-07-10)
+- Created lib/services/tester_reminder_service.dart for Play Store Closed Testing (20 testers, 14 days).
+- Uses workmanager package for background periodic tasks (every ~2 hours).
+- If tester has not opened app today, sends local notification reminder.
+- Once app is opened, marks today as done and cancels further notifications.
+- Controlled by Firebase Remote Config: 	esting_reminder_enabled (default: false).
+- Cleanly removable: delete 1 file + 2 lines from main.dart when testing is done.
+- Added RECEIVE_BOOT_COMPLETED permission to AndroidManifest.xml.
+- Version bumped to 1.5.33+156.
+
+## App Logo Updated (2026-07-10)
+- Verified assets/logo.png is 1024x1024.
+- Added remove_alpha_ios: true to pubspec.yaml to avoid Apple Store rejection.
+- Generated all required icon sizes for Android and iOS using flutter_launcher_icons.
+
+- [10 Jul 2026] Updated app logo with new neon glowing design, dynamically resized to maximum safe zone without crop, bumped version to 1.5.35+158 and installed APK on mobile.

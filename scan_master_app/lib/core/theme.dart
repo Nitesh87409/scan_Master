@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'animations.dart';
+import 'package:scan_master_app/core/animations.dart';
 
 class AppTheme {
   // Light Theme

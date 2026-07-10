@@ -1,0 +1,13 @@
+{
+  "name": "scan-master-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for CI/CD automation",
+  "main": "update_firebase.js",
+  "scripts": {
+    "update-firebase": "node update_firebase.js"
+  },
+  "dependencies": {
+    "googleapis": "^140.0.0",
+    "yaml": "^2.4.5"
+  }
+}

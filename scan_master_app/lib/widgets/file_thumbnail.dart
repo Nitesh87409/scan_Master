@@ -85,7 +85,7 @@ class _FileThumbnailState extends State<FileThumbnail> {
           File(widget.file.path),
           fit: BoxFit.cover,
           cacheWidth: 250,
-          errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey),
+          errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, color: Colors.grey),
         ),
         _buildBadge(extension == 'JPG' ? 'JPEG' : extension, Colors.blue),
       ],
@@ -129,7 +129,7 @@ class _FileThumbnailState extends State<FileThumbnail> {
           future: _thumbnailFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+              return Center(child: CircularProgressIndicator(strokeWidth: 2));
             }
             if (snapshot.hasData) {
               return Container(
@@ -137,7 +137,7 @@ class _FileThumbnailState extends State<FileThumbnail> {
                 child: snapshot.data!,
               );
             }
-            return const Icon(Icons.picture_as_pdf, color: Colors.redAccent);
+            return Icon(Icons.picture_as_pdf, color: Colors.redAccent);
           },
         ),
         _buildBadge('PDF', Colors.redAccent),
@@ -160,7 +160,7 @@ class _FileThumbnailState extends State<FileThumbnail> {
       }
 
       if (await _isPdfEncrypted(widget.file.path)) {
-        return const Center(
+        return Center(
           child: Icon(Icons.lock, color: Colors.redAccent, size: 24),
         );
       }
@@ -193,7 +193,7 @@ class _FileThumbnailState extends State<FileThumbnail> {
         ),
         child: Text(
           text,
-          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
         ),
       ),
     );
