@@ -94,15 +94,15 @@ class _FileThumbnailState extends State<FileThumbnail> {
 
 
   static Future<bool> _isPdfEncrypted(String path) async {
+    RandomAccessFile? raf;
     try {
       final file = File(path);
-      final raf = await file.open(mode: FileMode.read);
+      raf = await file.open(mode: FileMode.read);
       final length = await raf.length();
       
       final firstRead = length > 4096 ? 4096 : length;
       final firstBytes = await raf.read(firstRead);
       if (String.fromCharCodes(firstBytes).contains('/Encrypt')) {
-        await raf.close();
         return true;
       }
       
@@ -110,14 +110,14 @@ class _FileThumbnailState extends State<FileThumbnail> {
         await raf.setPosition(length - 4096);
         final lastBytes = await raf.read(4096);
         if (String.fromCharCodes(lastBytes).contains('/Encrypt')) {
-          await raf.close();
           return true;
         }
       }
-      await raf.close();
       return false;
     } catch (e) {
       return false;
+    } finally {
+      try { await raf?.close(); } catch (_) {}
     }
   }
 

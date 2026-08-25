@@ -31,7 +31,9 @@ class _TrashScreenState extends State<TrashScreen> {
     // Precompute stats to avoid blocking I/O in the build method
     final Map<String, FileStat> newStats = {};
     for (final file in files) {
-      newStats[file.path] = file.statSync();
+      try {
+        newStats[file.path] = await file.stat();
+      } catch (_) {}
     }
 
     if (mounted) {

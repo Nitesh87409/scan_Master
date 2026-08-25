@@ -6,6 +6,36 @@
       },
       "valueType": "BOOLEAN"
     },
+    "ads_home_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_pdf_tools_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_viewer_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_settings_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_folder_view_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
     "analytics_enabled": {
       "defaultValue": {
         "value": "true"

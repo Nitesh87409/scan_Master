@@ -228,14 +228,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          BannerAdWidget(isEnabled: AppConfig.adsHomeScreenEnabled),
         ],
       ),
       floatingActionButton: _GlowingScanButton(
         onPressed: () => _startScan(isGallery: false),
       ),
       floatingActionButtonLocation: const _FixedCenterDockedFabLocation(),
-      bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          BannerAdWidget(isEnabled: AppConfig.adsHomeScreenEnabled),
+          BottomAppBar(
         height: 58,
         padding: EdgeInsets.zero,
         shape: const CircularNotchedRectangle(),
@@ -256,6 +259,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      ),
+        ],
       ),
     ));
   }

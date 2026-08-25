@@ -38,6 +38,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
 
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
       final sizePref = prefs.getString('thumbnail_size') ?? 'Small';
       if (sizePref == 'Small') _thumbnailSize = 50.0;

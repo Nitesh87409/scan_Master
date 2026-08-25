@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:scan_master_app/core/app_config.dart';
@@ -38,7 +39,7 @@ class AdService {
           );
         },
         onAdFailedToLoad: (err) {
-          print('Failed to load an interstitial ad: ${err.message}');
+          debugPrint('Failed to load an interstitial ad: ${err.message}');
           _isInterstitialAdLoaded = false;
         },
       ),
@@ -83,11 +84,16 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
       size: AdSize.banner,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
+          if (!mounted) {
+            ad.dispose();
+            return;
+          }
           setState(() {
             _isLoaded = true;
           });
         },
         onAdFailedToLoad: (ad, err) {
+          debugPrint('Banner ad failed to load: ${err.message}');
           ad.dispose();
         },
       ),
@@ -114,6 +120,6 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
         ),
       );
     }
-    return SizedBox(height: 50); // Ad space placeholder
+    return const SizedBox.shrink();
   }
 }

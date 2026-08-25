@@ -8,6 +8,7 @@ import 'package:archive/archive_io.dart';
 import 'package:scan_master_app/constants/document_filters.dart';
 import 'package:scan_master_app/utils/file_options_helper.dart';
 import 'package:scan_master_app/utils/file_filter_util.dart';
+import 'package:scan_master_app/core/app_config.dart';
 import 'package:scan_master_app/services/file_manager_service.dart';
 import 'package:scan_master_app/services/ad_service.dart';
 import 'package:scan_master_app/widgets/file_thumbnail.dart';
@@ -295,7 +296,7 @@ class _FolderViewScreenState extends State<FolderViewScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const BannerAdWidget(),
+      bottomNavigationBar: BannerAdWidget(isEnabled: AppConfig.adsFolderViewScreenEnabled),
     );
   }
 }

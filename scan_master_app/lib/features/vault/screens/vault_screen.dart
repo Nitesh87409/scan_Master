@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:scan_master_app/services/file_manager_service.dart';
 import 'package:scan_master_app/services/auth_service.dart';
 import 'package:scan_master_app/widgets/file_thumbnail.dart';
-import 'package:scan_master_app/utils/file_options_helper.dart';
+import 'package:scan_master_app/features/viewer/screens/viewer_screen.dart';
 import 'package:path_provider/path_provider.dart';
 
 class VaultScreen extends StatefulWidget {
@@ -139,12 +139,12 @@ class _VaultScreenState extends State<VaultScreen> {
                     onPressed: () => _moveToNormal(file),
                   ),
                   onTap: () {
-                    // Open the file options (but don't show move to vault since it's already in vault)
-                    FileOptionsHelper.showFileOptions(
-                      context: context, 
-                      file: file as File, 
-                      fileManager: _fileManager, 
-                      onFileChanged: _loadVaultFiles
+                    // Vault-specific: only allow View (no share/open-with to prevent bypass)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ViewerScreen(file: file as File),
+                      ),
                     );
                   },
                 );

@@ -23,7 +23,7 @@ class ViewerScreen extends StatefulWidget {
 
 class _ViewerScreenState extends State<ViewerScreen> {
   bool _isPopping = false;
-  late bool _isPdf;
+  bool _isPdf = false;
   late String _fileName;
   
   bool _isReady = false;
@@ -33,19 +33,34 @@ class _ViewerScreenState extends State<ViewerScreen> {
   @override
   void initState() {
     super.initState();
-    final file = File(widget.file.path);
-    _isPdf = widget.file.path.toLowerCase().endsWith('.pdf') || _checkIfPdf(file);
+    _isPdf = widget.file.path.toLowerCase().endsWith('.pdf');
     _fileName = widget.file.path.split(Platform.pathSeparator).last;
+    if (!_isPdf) {
+      // Check file header asynchronously for files without .pdf extension
+      _checkIfPdfAsync(File(widget.file.path));
+    }
     if (_isPdf && !_fileName.toLowerCase().endsWith('.pdf')) {
       _fileName += '.pdf';
     }
   }
 
-  bool _checkIfPdf(File file) {
+  Future<void> _checkIfPdfAsync(File file) async {
+    final result = await _checkIfPdf(file);
+    if (result && mounted) {
+      setState(() {
+        _isPdf = true;
+        if (!_fileName.toLowerCase().endsWith('.pdf')) {
+          _fileName += '.pdf';
+        }
+      });
+    }
+  }
+
+  Future<bool> _checkIfPdf(File file) async {
     RandomAccessFile? raf;
     try {
-      raf = file.openSync(mode: FileMode.read);
-      final bytes = raf.readSync(5);
+      raf = await file.open(mode: FileMode.read);
+      final bytes = await raf.read(5);
       // '%PDF-' is [37, 80, 68, 70, 45]
       if (bytes.length >= 5 &&
           bytes[0] == 37 &&
@@ -59,7 +74,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
       debugPrint('Error checking file header: $e');
     } finally {
       try {
-        raf?.closeSync();
+        await raf?.close();
       } catch (_) {}
     }
     return false;

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -87,7 +88,7 @@ class FileManagerService {
         return path.endsWith('.pdf') || path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.png') || path.endsWith('.zip') || path.endsWith('.txt');
       }, maxDays: days);
     } catch (e) {
-      print('Error getting files: $e');
+      debugPrint('Error getting files: $e');
       return [];
     }
   }
@@ -118,7 +119,7 @@ class FileManagerService {
       await entity.delete(recursive: true);
       await _updatePinnedPath(path, null);
     } catch (e) {
-      print('Error deleting permanently: $e');
+      debugPrint('Error deleting permanently: $e');
     }
   }
 
@@ -160,7 +161,7 @@ class FileManagerService {
         return newFile.path;
       }
     } catch (e) {
-      print('Error moving to trash: $e');
+      debugPrint('Error moving to trash: $e');
     }
     return null;
   }
@@ -177,7 +178,7 @@ class FileManagerService {
         return newFile.path;
       }
     } catch (e) {
-      print('Error moving to vault: $e');
+      debugPrint('Error moving to vault: $e');
     }
     return null;
   }
@@ -194,7 +195,7 @@ class FileManagerService {
         return newDir.path;
       }
     } catch (e) {
-      print('Error moving folder to trash: $e');
+      debugPrint('Error moving folder to trash: $e');
     }
     return null;
   }
@@ -211,7 +212,7 @@ class FileManagerService {
         
         // Check for duplicates case-insensitively
         final parentDir = Directory(dir);
-        final siblings = parentDir.listSync();
+        final siblings = await parentDir.list().toList();
         for (final entity in siblings) {
           if (entity is File && entity.path.split(Platform.pathSeparator).last.toLowerCase() == '$newName.$ext'.toLowerCase()) {
             throw Exception('already_exists');
@@ -225,7 +226,7 @@ class FileManagerService {
       return null;
     } catch (e) {
       if (e.toString().contains('already_exists')) rethrow;
-      print('Error renaming file: $e');
+      debugPrint('Error renaming file: $e');
       return null;
     }
   }
@@ -235,7 +236,7 @@ class FileManagerService {
   Future<List<Directory>> getFolders() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      final List<FileSystemEntity> entities = directory.listSync();
+      final List<FileSystemEntity> entities = await directory.list().toList();
       
       final folders = entities
           .whereType<Directory>()
@@ -246,7 +247,7 @@ class FileManagerService {
           .compareTo(b.path.split(Platform.pathSeparator).last.toLowerCase()));
       return folders;
     } catch (e) {
-      print('Error getting folders: $e');
+      debugPrint('Error getting folders: $e');
       return [];
     }
   }
@@ -258,7 +259,7 @@ class FileManagerService {
       final directory = await getApplicationDocumentsDirectory();
       
       // Case-insensitive check
-      final existingEntities = directory.listSync();
+      final existingEntities = await directory.list().toList();
       for (final entity in existingEntities) {
         if (entity is Directory && entity.path.split(Platform.pathSeparator).last.toLowerCase() == folderName.toLowerCase()) {
           throw Exception('already_exists');
@@ -272,7 +273,7 @@ class FileManagerService {
       return folder;
     } catch (e) {
       if (e.toString().contains('already_exists')) rethrow;
-      print('Error creating folder: $e');
+      debugPrint('Error creating folder: $e');
       return null;
     }
   }
@@ -286,7 +287,7 @@ class FileManagerService {
         final parentDir = folder.parent;
         
         // Case-insensitive check
-        final existingEntities = parentDir.listSync();
+        final existingEntities = await parentDir.list().toList();
         for (final entity in existingEntities) {
           if (entity is Directory && entity.path.split(Platform.pathSeparator).last.toLowerCase() == newName.toLowerCase()) {
             throw Exception('already_exists');
@@ -300,7 +301,7 @@ class FileManagerService {
       return null;
     } catch (e) {
       if (e.toString().contains('already_exists')) rethrow;
-      print('Error renaming folder: $e');
+      debugPrint('Error renaming folder: $e');
       return null;
     }
   }
@@ -316,7 +317,7 @@ class FileManagerService {
       }
       return [];
     } catch (e) {
-      print('Error getting files in folder: $e');
+      debugPrint('Error getting files in folder: $e');
       return [];
     }
   }
@@ -333,7 +334,7 @@ class FileManagerService {
       }
       return false;
     } catch (e) {
-      print('Error moving file: $e');
+      debugPrint('Error moving file: $e');
       return false;
     }
   }
@@ -351,7 +352,7 @@ class FileManagerService {
       }
       return false;
     } catch (e) {
-      print('Error removing file from folder: $e');
+      debugPrint('Error removing file from folder: $e');
       return false;
     }
   }
@@ -374,7 +375,7 @@ class FileManagerService {
         return file is File || file is Directory;
       });
     } catch (e) {
-      print('Error getting trash files: $e');
+      debugPrint('Error getting trash files: $e');
       return [];
     }
   }
@@ -424,7 +425,7 @@ class FileManagerService {
       }
       return false;
     } catch (e) {
-      print('Error restoring file: $e');
+      debugPrint('Error restoring file: $e');
       return false;
     }
   }
@@ -433,13 +434,13 @@ class FileManagerService {
     try {
       final trashFolder = await getTrashFolder();
       if (await trashFolder.exists()) {
-        final files = trashFolder.listSync();
+        final files = await trashFolder.list().toList();
         for (final file in files) {
           await file.delete(recursive: true);
         }
       }
     } catch (e) {
-      print('Error emptying trash: $e');
+      debugPrint('Error emptying trash: $e');
     }
   }
 
@@ -448,10 +449,10 @@ class FileManagerService {
     try {
       final trashFolder = await getTrashFolder();
       if (await trashFolder.exists()) {
-        final files = trashFolder.listSync();
+        final files = await trashFolder.list().toList();
         final now = DateTime.now();
         for (final file in files) {
-          final stat = file.statSync();
+          final stat = await file.stat();
           final difference = now.difference(stat.modified);
           if (difference.inDays >= retentionDays) {
             await file.delete(recursive: true);
@@ -459,7 +460,7 @@ class FileManagerService {
         }
       }
     } catch (e) {
-      print('Error cleaning up trash: $e');
+      debugPrint('Error cleaning up trash: $e');
     }
   }
 }

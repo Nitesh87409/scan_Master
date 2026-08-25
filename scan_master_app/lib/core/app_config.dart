@@ -38,6 +38,7 @@ class AppConfig {
   static bool get adsPdfToolsScreenEnabled => _rc.getBool('ads_pdf_tools_screen_enabled');
   static bool get adsViewerScreenEnabled => _rc.getBool('ads_viewer_screen_enabled');
   static bool get adsSettingsScreenEnabled => _rc.getBool('ads_settings_screen_enabled');
+  static bool get adsFolderViewScreenEnabled => _rc.getBool('ads_folder_view_screen_enabled');
   static bool get analyticsEnabled => _rc.getBool('analytics_enabled');
   static bool get ocrFeatureEnabled => _rc.getBool('ocr_feature_enabled');
   static bool get qrFeatureEnabled => _rc.getBool('qr_feature_enabled');
@@ -102,7 +103,7 @@ class AppConfig {
     try {
       await _rc.setConfigSettings(RemoteConfigSettings(
         fetchTimeout: const Duration(minutes: 1),
-        minimumFetchInterval: const Duration(hours: 1),
+        minimumFetchInterval: kDebugMode ? Duration.zero : const Duration(hours: 1),
       ));
 
       // All defaults — these work even if Firebase fails or user is offline
@@ -113,6 +114,7 @@ class AppConfig {
         'ads_pdf_tools_screen_enabled': true,
         'ads_viewer_screen_enabled': true,
         'ads_settings_screen_enabled': true,
+        'ads_folder_view_screen_enabled': true,
         'analytics_enabled': true,
         'ocr_feature_enabled': true,
         'qr_feature_enabled': true,

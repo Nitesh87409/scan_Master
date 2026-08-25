@@ -1,6 +1,7 @@
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
 import 'package:local_auth_darwin/local_auth_darwin.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   static final LocalAuthentication _auth = LocalAuthentication();
@@ -31,7 +32,7 @@ class AuthService {
 
       return didAuthenticate;
     } catch (e) {
-      print('Auth error: $e');
+      debugPrint('Auth error: $e');
       return false;
     }
   }
