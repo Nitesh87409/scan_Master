@@ -1,66 +1,72 @@
 {
   "parameters": {
-    "ads_enabled": {
-      "defaultValue": {
-        "value": "false"
-      },
-      "valueType": "BOOLEAN"
-    },
     "ads_home_screen_enabled": {
       "defaultValue": {
         "value": "true"
       },
       "valueType": "BOOLEAN"
     },
-    "ads_pdf_tools_screen_enabled": {
+    "ads_enabled": {
       "defaultValue": {
         "value": "true"
       },
       "valueType": "BOOLEAN"
     },
-    "ads_viewer_screen_enabled": {
+    "force_update_required": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "testing_reminder_enabled": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_protect_interstitial_enabled": {
       "defaultValue": {
         "value": "true"
       },
       "valueType": "BOOLEAN"
     },
-    "ads_settings_screen_enabled": {
+    "announcement_message": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "admob_protect_interstitial_ios": {
+      "defaultValue": {
+        "value": "ca-app-pub-7632721706853296/7783729001"
+      },
+      "valueType": "STRING"
+    },
+    "watermark_feature_enabled": {
       "defaultValue": {
         "value": "true"
       },
       "valueType": "BOOLEAN"
     },
-    "ads_folder_view_screen_enabled": {
+    "admob_protect_interstitial_android": {
       "defaultValue": {
-        "value": "true"
+        "value": "ca-app-pub-3940256099942544/1033173712"
+      },
+      "valueType": "STRING"
+    },
+    "admob_native_ios": {
+      "defaultValue": {
+        "value": "ca-app-pub-7632721706853296/3203309990"
+      },
+      "valueType": "STRING"
+    },
+    "show_announcement": {
+      "defaultValue": {
+        "value": "false"
       },
       "valueType": "BOOLEAN"
     },
     "analytics_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "ocr_feature_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "qr_feature_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "signature_feature_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "vault_feature_enabled": {
       "defaultValue": {
         "value": "true"
       },
@@ -72,51 +78,27 @@
       },
       "valueType": "BOOLEAN"
     },
-    "watermark_feature_enabled": {
+    "latest_app_version": {
       "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "export_images_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "export_text_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "protect_pdf_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "admob_banner_android": {
-      "defaultValue": {
-        "value": "ca-app-pub-3940256099942544/6300978111"
+        "value": "1.0.0"
       },
       "valueType": "STRING"
     },
-    "admob_banner_ios": {
+    "ads_home_native_enabled": {
       "defaultValue": {
-        "value": "ca-app-pub-3940256099942544/2934735716"
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "play_store_url": {
+      "defaultValue": {
+        "value": "https://play.google.com/store/apps/details?id=com.scanmaster.scan_master_app"
       },
       "valueType": "STRING"
     },
-    "admob_interstitial_android": {
+    "privacy_policy_url": {
       "defaultValue": {
-        "value": "ca-app-pub-3940256099942544/1033173712"
-      },
-      "valueType": "STRING"
-    },
-    "admob_interstitial_ios": {
-      "defaultValue": {
-        "value": "ca-app-pub-3940256099942544/4411468910"
+        "value": "https://docs.google.com/document/d/1GhSOcrpymsv1XZvCXgzW1YQWlrrCpNiBy2dc2eBW8hU/edit?usp=sharing"
       },
       "valueType": "STRING"
     },
@@ -126,9 +108,15 @@
       },
       "valueType": "STRING"
     },
-    "play_store_url": {
+    "ocr_feature_enabled": {
       "defaultValue": {
-        "value": "https://play.google.com/store/apps/details?id=com.scanmaster.scan_master_app"
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "amazon_developer_page": {
+      "defaultValue": {
+        "value": "https://www.amazon.com/s?rh=p_4:Nitesh"
       },
       "valueType": "STRING"
     },
@@ -144,49 +132,67 @@
       },
       "valueType": "STRING"
     },
-    "amazon_developer_page": {
+    "discover_apps_url": {
       "defaultValue": {
-        "value": "https://www.amazon.com/s?rh=p_4:Nitesh"
+        "value": "https://play.google.com/store/search?q=pub:NITESH%20CODES&c=apps"
       },
       "valueType": "STRING"
     },
-    "latest_app_version": {
+    "signature_feature_enabled": {
       "defaultValue": {
-        "value": "1.0.0"
-      },
-      "valueType": "STRING"
-    },
-    "update_url": {
-      "defaultValue": {
-        "value": "https://play.google.com/store/apps/details?id=com.scanmaster.scan_master_app"
-      },
-      "valueType": "STRING"
-    },
-    "force_update_required": {
-      "defaultValue": {
-        "value": "false"
+        "value": "true"
       },
       "valueType": "BOOLEAN"
     },
-    "show_announcement": {
+    "qr_feature_enabled": {
       "defaultValue": {
-        "value": "false"
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "announcement_action_url": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "maintenance_message": {
+      "defaultValue": {
+        "value": "App is under maintenance. Please try again later."
+      },
+      "valueType": "STRING"
+    },
+    "protect_pdf_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "vault_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "terms_of_service_url": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "export_text_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "export_images_enabled": {
+      "defaultValue": {
+        "value": "true"
       },
       "valueType": "BOOLEAN"
     },
     "announcement_title": {
-      "defaultValue": {
-        "value": ""
-      },
-      "valueType": "STRING"
-    },
-    "announcement_message": {
-      "defaultValue": {
-        "value": ""
-      },
-      "valueType": "STRING"
-    },
-    "announcement_action_url": {
       "defaultValue": {
         "value": ""
       },
@@ -198,53 +204,17 @@
       },
       "valueType": "BOOLEAN"
     },
-    "maintenance_message": {
+    "admob_native_android": {
       "defaultValue": {
-        "value": "App is under maintenance. Please try again later."
+        "value": "ca-app-pub-3940256099942544/2247696110"
       },
       "valueType": "STRING"
     },
-    "privacy_policy_url": {
+    "update_url": {
       "defaultValue": {
-        "value": "https://docs.google.com/document/d/1GhSOcrpymsv1XZvCXgzW1YQWlrrCpNiBy2dc2eBW8hU/edit?usp=sharing"
+        "value": "https://play.google.com/store/apps/details?id=com.scanmaster.scan_master_app"
       },
       "valueType": "STRING"
-    },
-    "terms_of_service_url": {
-      "defaultValue": {
-        "value": ""
-      },
-      "valueType": "STRING"
-    },
-    "testing_reminder_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "ads_home_screen_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "ads_pdf_tools_screen_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "ads_viewer_screen_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "ads_settings_screen_enabled": {
-      "defaultValue": {
-        "value": "true"
-      },
-      "valueType": "BOOLEAN"
     }
   }
 }

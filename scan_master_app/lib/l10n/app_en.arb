@@ -148,5 +148,12 @@
   "quickActionOcr": "OCR Text",
   "quickActionOcrDesc": "Extract Text",
   "quickActionPdfTools": "PDF Tools",
-  "quickActionPdfToolsDesc": "Merge & Split"
+  "quickActionPdfToolsDesc": "Merge & Split",
+  "exportTextTitle": "Export Text",
+  "descExportText": "Extract text from PDF",
+  "watermarkPdfTitle": "Watermark PDF",
+  "descWatermarkPdf": "Add watermark to PDF",
+  "msgFolderEmpty": "This folder is empty.",
+  "btnShareFolder": "Share Folder",
+  "processingBackground": "Processing in background..."
 }

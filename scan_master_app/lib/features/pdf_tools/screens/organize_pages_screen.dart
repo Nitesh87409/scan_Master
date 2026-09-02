@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:pdf_manipulator/pdf_manipulator.dart';
-import 'package:pdf_manipulator/io.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
 class OrganizePagesScreen extends StatefulWidget {
@@ -81,25 +80,25 @@ class _OrganizePagesScreenState extends State<OrganizePagesScreen> {
     });
 
     try {
-      final pdf = Pdf();
       final outputDir = await getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      
-      final sourceBytes = await widget.file.readAsBytes();
-      final source = MemorySource(sourceBytes);
-
       final finalOutputPath = '${outputDir.path}/Reordered_$timestamp.pdf';
-      final outSink = await FileSink.create(File(finalOutputPath));
-      
-      // The native Rust backend supports rearranging pages by passing them in the desired order
-      await pdf.extractPages(
-        source,
-        outSink,
-        pages: _pageOrder,
+
+      final resultPath = await PdfManipulator().pdfPageReorder(
+        params: PDFPageReorderParams(
+          pdfPath: widget.file.path,
+          pageNumbers: _pageOrder,
+        ),
       );
-      
-      await outSink.close();
-      await pdf.dispose();
+
+      if (resultPath != null) {
+        final resultFile = File(resultPath);
+        if (await resultFile.exists()) {
+          await resultFile.copy(finalOutputPath);
+        }
+      } else {
+        throw Exception("Failed to reorder PDF");
+      }
 
       if (mounted) {
         Navigator.pop(context, finalOutputPath);

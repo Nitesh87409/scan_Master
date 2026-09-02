@@ -57,18 +57,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get btnCreateFolder => 'नया क्लाइंट फ़ोल्डर';
 
   @override
-  String get btnShareFolder => 'फ़ोल्डर शेयर करें (ZIP)';
+  String get btnShareFolder => 'फ़ोल्डर साझा करें';
 
   @override
   String get msgNoFolders => 'कोई क्लाइंट फ़ोल्डर उपलब्ध नहीं है।';
 
   @override
-  String get msgCreateFolderPrompt =>
-      'दस्तावेज़ों को व्यवस्थित करने के लिए एक बनाएँ।';
+  String get msgCreateFolderPrompt => 'दस्तावेज़ों को व्यवस्थित करने के लिए एक बनाएँ।';
 
   @override
-  String get msgFolderEmpty =>
-      'फ़ोल्डर खाली है। क्लाइंट दस्तावेज़ों को यहाँ ले जाएँ।';
+  String get msgFolderEmpty => 'यह फ़ोल्डर खाली है।';
 
   @override
   String get hintFolderName => 'क्लाइंट या प्रोजेक्ट का नाम दर्ज करें';
@@ -140,8 +138,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingTrashRetention => 'ट्रैश प्रतिधारण अवधि';
 
   @override
-  String get settingTrashRetentionDesc =>
-      'ट्रैश से फ़ाइलों को स्वचालित रूप से हटाएँ';
+  String get settingTrashRetentionDesc => 'ट्रैश से फ़ाइलों को स्वचालित रूप से हटाएँ';
 
   @override
   String get msgTrashCleanup => 'पुरानी फ़ाइलों की सफाई की जा रही है...';
@@ -162,12 +159,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get themeDark => 'डार्क थीम';
 
   @override
-  String get badgePrivacy =>
-      '100% ऑफ़लाइन • सुरक्षित और संरक्षित • कोई ट्रैकिंग नहीं';
+  String get badgePrivacy => '100% ऑफ़लाइन • सुरक्षित और संरक्षित • कोई ट्रैकिंग नहीं';
 
   @override
-  String get processingBackground =>
-      'बैकग्राउंड में बड़ी फ़ाइल प्रोसेस की जा रही है।\nआप सुरक्षित रूप से वापस जा सकते हैं; कार्य पूरा होने पर हम आपको सूचित करेंगे।';
+  String get processingBackground => 'बैकग्राउंड में प्रोसेस हो रहा है...';
 
   @override
   String get loading => 'प्रोसेस हो रहा है...';
@@ -203,8 +198,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get whatWouldYouLikeToDo => 'आप क्या करना चाहेंगे?';
 
   @override
-  String get descSplitPdf =>
-      'पेज निकालें या पीडीएफ को कई फ़ाइलों में विभाजित करें';
+  String get descSplitPdf => 'पेज निकालें या पीडीएफ को कई फ़ाइलों में विभाजित करें';
 
   @override
   String get descMergePdf => 'कई पीडीएफ को एक फ़ाइल में मिलाएँ';
@@ -231,8 +225,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get compressPdfTitle => 'पीडीएफ कंप्रेस करें';
 
   @override
-  String get descCompressPdf =>
-      'आसानी से शेयर करने के लिए पीडीएफ फ़ाइल का आकार कम करें';
+  String get descCompressPdf => 'आसानी से शेयर करने के लिए पीडीएफ फ़ाइल का आकार कम करें';
 
   @override
   String get compressOptionsTitle => 'पीडीएफ कंप्रेस करें';
@@ -268,8 +261,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get compressInvalidTarget => 'अमान्य लक्ष्य आकार';
 
   @override
-  String get compressInvalidTargetMsg =>
-      'कृपया MB में एक मान्य लक्ष्य आकार दर्ज करें';
+  String get compressInvalidTargetMsg => 'कृपया MB में एक मान्य लक्ष्य आकार दर्ज करें';
 
   @override
   String get compressNotNeeded => 'कंप्रेशन की आवश्यकता नहीं है';
@@ -278,8 +270,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get compressFailed => 'कंप्रेशन विफल रहा';
 
   @override
-  String get compressAlreadyOptimized =>
-      'यह पीडीएफ पहले से ही ऑप्टिमाइज़ किया गया है — फ़ाइल का आकार और कम करना संभव नहीं है';
+  String get compressAlreadyOptimized => 'यह पीडीएफ पहले से ही ऑप्टिमाइज़ किया गया है — फ़ाइल का आकार और कम करना संभव नहीं है';
 
   @override
   String get compressingPdf => 'पीडीएफ कंप्रेस किया जा रहा है...';
@@ -294,18 +285,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get descExportImages => 'सभी पीडीएफ पेजों को JPEG/PNG इमेज में बदलें';
 
   @override
-  String get exportTextTitle => 'टेक्स्ट निकालें (TXT)';
+  String get exportTextTitle => 'टेक्स्ट एक्सपोर्ट';
 
   @override
-  String get descExportText =>
-      'पीडीएफ से .txt फ़ाइल में सभी टेक्स्ट निकालने के लिए OCR चलाएँ';
+  String get descExportText => 'पीडीएफ से टेक्स्ट निकालें';
 
   @override
-  String get watermarkPdfTitle => 'वॉटरमार्क जोड़ें';
+  String get watermarkPdfTitle => 'वॉटरमार्क पीडीएफ';
 
   @override
-  String get descWatermarkPdf =>
-      'पीडीएफ के सभी पेजों पर कस्टम टेक्स्ट ओवरले करें';
+  String get descWatermarkPdf => 'पीडीएफ में वॉटरमार्क जोड़ें';
 
   @override
   String get settingsTitle => 'सेटिंग्स';
@@ -323,8 +312,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingThumbnailSize => 'थंबनेल आकार';
 
   @override
-  String get settingThumbnailSizeDesc =>
-      'हालिया फ़ाइलों के प्रीव्यू का आकार बदलें';
+  String get settingThumbnailSizeDesc => 'हालिया फ़ाइलों के प्रीव्यू का आकार बदलें';
 
   @override
   String get sizeSmall => 'छोटा';
@@ -366,8 +354,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingAnalytics => 'उपयोग विश्लेषण';
 
   @override
-  String get settingAnalyticsDesc =>
-      'अनाम उपयोग डेटा साझा करके इस ऐप को बेहतर बनाने में मदद करें';
+  String get settingAnalyticsDesc => 'अनाम उपयोग डेटा साझा करके इस ऐप को बेहतर बनाने में मदद करें';
 
   @override
   String get days7 => '7 दिन';

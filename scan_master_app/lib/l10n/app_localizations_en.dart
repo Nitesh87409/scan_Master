@@ -57,7 +57,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get btnCreateFolder => 'New Client Folder';
 
   @override
-  String get btnShareFolder => 'Share Folder (ZIP)';
+  String get btnShareFolder => 'Share Folder';
 
   @override
   String get msgNoFolders => 'No client folders available.';
@@ -66,7 +66,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msgCreateFolderPrompt => 'Create one to organize documents.';
 
   @override
-  String get msgFolderEmpty => 'Folder is empty. Move client documents here.';
+  String get msgFolderEmpty => 'This folder is empty.';
 
   @override
   String get hintFolderName => 'Enter client or project name';
@@ -138,8 +138,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingTrashRetention => 'Trash Retention Period';
 
   @override
-  String get settingTrashRetentionDesc =>
-      'Automatically delete files from trash';
+  String get settingTrashRetentionDesc => 'Automatically delete files from trash';
 
   @override
   String get msgTrashCleanup => 'Cleaning up old files...';
@@ -163,8 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get badgePrivacy => '100% Offline • Safe & Secure • No Tracking';
 
   @override
-  String get processingBackground =>
-      'Processing large file in background.\nYou can safely go back; we will notify you when it\'s done.';
+  String get processingBackground => 'Processing in background...';
 
   @override
   String get loading => 'Processing...';
@@ -263,8 +261,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get compressInvalidTarget => 'Invalid target size';
 
   @override
-  String get compressInvalidTargetMsg =>
-      'Please enter a valid target size in MB';
+  String get compressInvalidTargetMsg => 'Please enter a valid target size in MB';
 
   @override
   String get compressNotNeeded => 'No compression needed';
@@ -273,8 +270,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get compressFailed => 'Compression Failed';
 
   @override
-  String get compressAlreadyOptimized =>
-      'This PDF is already optimized — no further size reduction possible';
+  String get compressAlreadyOptimized => 'This PDF is already optimized — no further size reduction possible';
 
   @override
   String get compressingPdf => 'Compressing PDF...';
@@ -289,17 +285,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get descExportImages => 'Convert all PDF pages into JPEG/PNG images';
 
   @override
-  String get exportTextTitle => 'Extract Text (TXT)';
+  String get exportTextTitle => 'Export Text';
 
   @override
-  String get descExportText =>
-      'Run OCR to extract all text from the PDF into a .txt file';
+  String get descExportText => 'Extract text from PDF';
 
   @override
-  String get watermarkPdfTitle => 'Add Watermark';
+  String get watermarkPdfTitle => 'Watermark PDF';
 
   @override
-  String get descWatermarkPdf => 'Overlay custom text on all pages of the PDF';
+  String get descWatermarkPdf => 'Add watermark to PDF';
 
   @override
   String get settingsTitle => 'Settings';
@@ -317,8 +312,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingThumbnailSize => 'Thumbnail Size';
 
   @override
-  String get settingThumbnailSizeDesc =>
-      'Adjust the size of recent files preview';
+  String get settingThumbnailSizeDesc => 'Adjust the size of recent files preview';
 
   @override
   String get sizeSmall => 'Small';
@@ -360,8 +354,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingAnalytics => 'Usage Analytics';
 
   @override
-  String get settingAnalyticsDesc =>
-      'Help improve this app by sharing anonymous usage data';
+  String get settingAnalyticsDesc => 'Help improve this app by sharing anonymous usage data';
 
   @override
   String get days7 => '7 Days';

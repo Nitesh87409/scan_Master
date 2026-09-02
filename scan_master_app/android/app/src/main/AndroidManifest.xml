@@ -7,7 +7,7 @@
             android:name=".MainActivity"
             android:label="@string/app_name_short"
             android:exported="true"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -48,10 +48,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <!-- AdMob App ID (Test ID) -->
+        <!-- AdMob App ID (Dynamic from local.properties) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="${admob_app_id}"/>
     </application>
     <!-- Internet Permission for Ads and other features -->
     <uses-permission android:name="android.permission.INTERNET" />

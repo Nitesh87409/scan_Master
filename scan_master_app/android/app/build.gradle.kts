@@ -7,6 +7,13 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+val admobAppId = localProperties.getProperty("flutter.admobAppId") ?: "ca-app-pub-3940256099942544~3347511713"
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -21,7 +28,7 @@ plugins {
 android {
     namespace = "com.scanmaster.scan_master_app"
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "30.0.16138531"
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -34,10 +41,11 @@ android {
         applicationId = "com.scanmaster.scan_master_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["admob_app_id"] = admobAppId
     }
 
     signingConfigs {

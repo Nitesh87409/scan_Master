@@ -26,8 +26,10 @@ class AuthService {
             cancelButton: 'Cancel',
           ),
         ],
-        biometricOnly: false,
-        persistAcrossBackgrounding: true,
+        options: const AuthenticationOptions(
+          biometricOnly: false,
+          stickyAuth: true,
+        ),
       );
 
       return didAuthenticate;

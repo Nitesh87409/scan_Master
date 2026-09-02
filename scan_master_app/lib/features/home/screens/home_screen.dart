@@ -24,6 +24,7 @@ import 'package:scan_master_app/utils/file_filter_util.dart';
 import 'package:scan_master_app/features/folders/screens/folders_screen.dart';
 import 'package:scan_master_app/features/trash/screens/trash_screen.dart';
 import 'package:scan_master_app/widgets/file_filter_bar.dart';
+import 'package:scan_master_app/widgets/native_ad_card.dart';
 import 'package:scan_master_app/features/settings/screens/settings_screen.dart';
 import 'package:scan_master_app/features/signature/screens/signature_screen.dart';
 import 'package:scan_master_app/features/qr_toolkit/screens/qr_toolkit_screen.dart';
@@ -49,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
   FileFilterType _currentFilter = FileFilterType.all;
   int _currentIndex = 0;
   String _searchQuery = '';
+  bool _adFailed = false;
 
   @override
   void initState() {
@@ -108,8 +110,6 @@ class _HomeScreenState extends State<HomeScreen> {
             SnackBar(content: Text('Saved ${files.length} file(s)')),
           );
         }
-        // Show Interstitial Ad after a successful scan/save
-        AdService.showInterstitialAd();
         if (isGallery) {
           AnalyticsEvents.logGalleryImport();
         } else {
@@ -233,14 +233,12 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: _GlowingScanButton(
         onPressed: () => _startScan(isGallery: false),
       ),
-      floatingActionButtonLocation: const _FixedCenterDockedFabLocation(),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          BannerAdWidget(isEnabled: AppConfig.adsHomeScreenEnabled),
-          BottomAppBar(
-        height: 58,
-        padding: EdgeInsets.zero,
+      floatingActionButtonLocation: _FixedCenterDockedFabLocation(
+        bottomPadding: MediaQuery.of(context).padding.bottom,
+      ),
+      bottomNavigationBar: BottomAppBar(
+        height: 58 + MediaQuery.of(context).padding.bottom,
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         child: Row(
@@ -260,14 +258,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-        ],
-      ),
     ));
   }
 
   Widget _buildTabItem({required IconData icon, required String label, required int index}) {
     final isSelected = _currentIndex == index;
     return InkWell(
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
       onTap: () {
         setState(() {
           _currentIndex = index;
@@ -348,6 +346,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     Expanded(
                       child: _buildActionCard(
                         context,
+                        'PDF Tools',
+                        'Merge & Split',
+                        Icons.picture_as_pdf,
+                        Colors.redAccent,
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const PdfToolsScreen()),
+                          ).then((value) {
+                            if (value == true) _loadFiles();
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: _buildActionCard(
+                        context,
                         'Signature',
                         'Draw & Save',
                         Icons.draw,
@@ -360,7 +376,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
                     ),
-                    SizedBox(width: 16),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
                     Expanded(
                       child: _buildActionCard(
                         context,
@@ -376,11 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
+                    SizedBox(width: 16),
                     Expanded(
                       child: _buildActionCard(
                         context,
@@ -392,25 +408,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const OcrScreen()),
-                          ).then((_) => AdService.showInterstitialAd());
-                        },
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: _buildActionCard(
-                        context,
-                        'PDF Tools',
-                        'Merge & Split',
-                        Icons.picture_as_pdf,
-                        Colors.redAccent,
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const PdfToolsScreen()),
-                          ).then((value) {
-                            if (value == true) _loadFiles();
-                          });
+                          );
                         },
                       ),
                     ),
@@ -438,10 +436,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         isPremium: true,
                       ),
                     ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: SizedBox(),
-                    ),
+                    if (!_adFailed) const SizedBox(width: 16),
+                    if (!_adFailed)
+                      Expanded(
+                        child: NativeAdCardWidget(
+                          baseColor: Colors.pink,
+                          onFailed: () {
+                            if (mounted) {
+                              setState(() {
+                                _adFailed = true;
+                              });
+                            }
+                          },
+                        ),
+                      ),
                   ],
                 ),
                 SizedBox(height: 32),
@@ -731,14 +739,24 @@ class _GlowingScanButtonState extends State<_GlowingScanButton> with SingleTicke
 
 
 class _FixedCenterDockedFabLocation extends FloatingActionButtonLocation {
-  const _FixedCenterDockedFabLocation();
+  final double bottomPadding;
+  const _FixedCenterDockedFabLocation({this.bottomPadding = 0.0});
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
-    final double fabY = scaffoldGeometry.scaffoldSize.height - 58.0 - (scaffoldGeometry.floatingActionButtonSize.height / 2.0) + 15.0; // 58 is bottom app bar height
+    final double fabY = scaffoldGeometry.scaffoldSize.height - 58.0 - bottomPadding - (scaffoldGeometry.floatingActionButtonSize.height / 2.0) + 15.0; // 58 is bottom app bar height
     return Offset(fabX, fabY);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is _FixedCenterDockedFabLocation && other.bottomPadding == bottomPadding;
+  }
+
+  @override
+  int get hashCode => bottomPadding.hashCode;
 }
 
 

@@ -240,7 +240,15 @@ class FileManagerService {
       
       final folders = entities
           .whereType<Directory>()
-          .where((dir) => !dir.path.split(Platform.pathSeparator).last.startsWith('.'))
+          .where((dir) {
+            final name = dir.path.split(Platform.pathSeparator).last;
+            final lowerName = name.toLowerCase();
+            return !name.startsWith('.') && 
+                   lowerName != 'flutter' && 
+                   lowerName != 'flutter_assets' && 
+                   lowerName != 'webview' &&
+                   lowerName != 'vault'; // Vault is internal and private
+          })
           .toList();
       // Sort folders alphabetically
       folders.sort((a, b) => a.path.split(Platform.pathSeparator).last.toLowerCase()

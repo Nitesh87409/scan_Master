@@ -33,14 +33,19 @@ tasks.register<Delete>("clean") {
 
 subprojects {
     project.pluginManager.withPlugin("com.android.library") {
-        project.extensions.configure<com.android.build.api.dsl.LibraryExtension>("android") {
-            compileSdk = 36
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_17
-                targetCompatibility = JavaVersion.VERSION_17
-            }
+        val android = project.extensions.getByName("android") as com.android.build.api.dsl.LibraryExtension
+        android.compileSdk = 36
+        android.compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
         }
     }
+    
+    tasks.withType<JavaCompile>().configureEach {
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
+    }
+
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)

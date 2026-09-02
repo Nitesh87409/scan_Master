@@ -18,7 +18,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:scan_master_app/firebase_options.dart';
 import 'package:scan_master_app/services/remote_config_service.dart';
 import 'package:scan_master_app/core/app_config.dart';
-import 'package:scan_master_app/services/tester_reminder_service.dart'; // Remove after testing
+
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -164,14 +164,12 @@ class _ScanMasterAppState extends State<ScanMasterApp> {
     _servicesInitialized = true;
     
     // These run AFTER the first frame, so user already sees the UI
+    await AppConfig.initialize(); // Load Firebase Remote Config values
     await AdService.initialize();
     await NotificationService.initialize();
-    await AppConfig.initialize(); // Load Firebase Remote Config values
     await RemoteConfigService.initialize(); // Check for updates
     
-    // Tester Reminder — remove after closed testing
-    await TesterReminderService.initialize();
-    TesterReminderService.markAppOpened();
+
     
     // Request FCM permission
     await FirebaseMessaging.instance.requestPermission();

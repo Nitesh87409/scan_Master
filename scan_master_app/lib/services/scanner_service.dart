@@ -15,7 +15,7 @@ class ScannerService {
   Future<List<String>> scanDocument({bool isGalleryImport = false}) async {
     try {
       final DocumentScannerOptions options = DocumentScannerOptions(
-        documentFormats: const {DocumentFormat.pdf, DocumentFormat.jpeg},
+        documentFormat: DocumentFormat.jpeg,
         mode: ScannerMode.full,
         pageLimit: 100,
         isGalleryImport: isGalleryImport,

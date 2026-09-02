@@ -57,7 +57,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get btnCreateFolder => 'নতুন ক্লায়েন্ট ফোল্ডার';
 
   @override
-  String get btnShareFolder => 'ফোল্ডার শেয়ার করুন (ZIP)';
+  String get btnShareFolder => 'ফোল্ডার শেয়ার করুন';
 
   @override
   String get msgNoFolders => 'কোন ক্লায়েন্ট ফোল্ডার উপলব্ধ নেই।';
@@ -66,7 +66,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get msgCreateFolderPrompt => 'নথিপত্র সাজানোর জন্য একটি তৈরি করুন।';
 
   @override
-  String get msgFolderEmpty => 'ফোল্ডার খালি। ক্লায়েন্ট নথিপত্র এখানে সরান।';
+  String get msgFolderEmpty => 'এই ফোল্ডারটি খালি।';
 
   @override
   String get hintFolderName => 'ক্লায়েন্ট বা প্রকল্পের নাম লিখুন';
@@ -138,8 +138,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get settingTrashRetention => 'ট্র্যাশ ধরে রাখার সময়কাল';
 
   @override
-  String get settingTrashRetentionDesc =>
-      'ট্র্যাশ থেকে স্বয়ংক্রিয়ভাবে ফাইল মুছুন';
+  String get settingTrashRetentionDesc => 'ট্র্যাশ থেকে স্বয়ংক্রিয়ভাবে ফাইল মুছুন';
 
   @override
   String get msgTrashCleanup => 'পুরানো ফাইল পরিষ্কার করা হচ্ছে...';
@@ -160,12 +159,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get themeDark => 'গাঢ় থিম';
 
   @override
-  String get badgePrivacy =>
-      '১০০% অফলাইন • নিরাপদ ও সুরক্ষিত • কোন ট্র্যাকিং নেই';
+  String get badgePrivacy => '১০০% অফলাইন • নিরাপদ ও সুরক্ষিত • কোন ট্র্যাকিং নেই';
 
   @override
-  String get processingBackground =>
-      'ব্যাকগ্রাউন্ডে বড় ফাইল প্রক্রিয়া করা হচ্ছে।\nআপনি নিরাপদে ফিরে যেতে পারেন; কাজ শেষ হলে আমরা আপনাকে জানাব।';
+  String get processingBackground => 'ব্যাকগ্রাউন্ডে প্রক্রিয়া করা হচ্ছে...';
 
   @override
   String get loading => 'প্রক্রিয়া করা হচ্ছে...';
@@ -201,8 +198,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get whatWouldYouLikeToDo => 'আপনি কি করতে চান?';
 
   @override
-  String get descSplitPdf =>
-      'পৃষ্ঠাগুলো আলাদা করুন বা একটি পিডিএফ একাধিক ফাইলে বিভক্ত করুন';
+  String get descSplitPdf => 'পৃষ্ঠাগুলো আলাদা করুন বা একটি পিডিএফ একাধিক ফাইলে বিভক্ত করুন';
 
   @override
   String get descMergePdf => 'একাধিক পিডিএফ একটি ফাইলে যুক্ত করুন';
@@ -265,8 +261,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get compressInvalidTarget => 'অবৈধ লক্ষ্য আকার';
 
   @override
-  String get compressInvalidTargetMsg =>
-      'দয়া করে এমবিতে একটি বৈধ লক্ষ্য আকার লিখুন';
+  String get compressInvalidTargetMsg => 'দয়া করে এমবিতে একটি বৈধ লক্ষ্য আকার লিখুন';
 
   @override
   String get compressNotNeeded => 'কোন সংকোচনের প্রয়োজন নেই';
@@ -275,8 +270,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get compressFailed => 'সংকোচন ব্যর্থ হয়েছে';
 
   @override
-  String get compressAlreadyOptimized =>
-      'এই পিডিএফটি ইতিমধ্যে অপ্টিমাইজ করা হয়েছে — আর কোনো আকার কমানো সম্ভব নয়';
+  String get compressAlreadyOptimized => 'এই পিডিএফটি ইতিমধ্যে অপ্টিমাইজ করা হয়েছে — আর কোনো আকার কমানো সম্ভব নয়';
 
   @override
   String get compressingPdf => 'পিডিএফ সংকুচিত করা হচ্ছে...';
@@ -288,22 +282,19 @@ class AppLocalizationsBn extends AppLocalizations {
   String get exportImagesTitle => 'ছবিতে রপ্তানি করুন';
 
   @override
-  String get descExportImages =>
-      'সমস্ত পিডিএফ পৃষ্ঠা জেপিইজি/পিএনজি ছবিতে রূপান্তর করুন';
+  String get descExportImages => 'সমস্ত পিডিএফ পৃষ্ঠা জেপিইজি/পিএনজি ছবিতে রূপান্তর করুন';
 
   @override
-  String get exportTextTitle => 'টেক্সট এক্সট্রাক্ট করুন (TXT)';
+  String get exportTextTitle => 'টেক্সট এক্সপোর্ট';
 
   @override
-  String get descExportText =>
-      'পিডিএফ থেকে একটি .txt ফাইলে সমস্ত টেক্সট এক্সট্রাক্ট করতে ওসিআর চালান';
+  String get descExportText => 'পিডিএফ থেকে টেক্সট বের করুন';
 
   @override
-  String get watermarkPdfTitle => 'জলছাপ যোগ করুন';
+  String get watermarkPdfTitle => 'ওয়াটারমার্ক পিডিএফ';
 
   @override
-  String get descWatermarkPdf =>
-      'পিডিএফের সমস্ত পৃষ্ঠায় কাস্টম টেক্সট ওভারলে করুন';
+  String get descWatermarkPdf => 'পিডিএফে ওয়াটারমার্ক যোগ করুন';
 
   @override
   String get settingsTitle => 'সেটিংস';
@@ -321,8 +312,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get settingThumbnailSize => 'থাম্বনেইল আকার';
 
   @override
-  String get settingThumbnailSizeDesc =>
-      'সাম্প্রতিক ফাইল প্রিভিউয়ের আকার পরিবর্তন করুন';
+  String get settingThumbnailSizeDesc => 'সাম্প্রতিক ফাইল প্রিভিউয়ের আকার পরিবর্তন করুন';
 
   @override
   String get sizeSmall => 'ছোট';
@@ -364,8 +354,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get settingAnalytics => 'ব্যবহারের বিশ্লেষণ';
 
   @override
-  String get settingAnalyticsDesc =>
-      'বেনামী ব্যবহারের তথ্য শেয়ার করে এই অ্যাপটি উন্নত করতে সাহায্য করুন';
+  String get settingAnalyticsDesc => 'বেনামী ব্যবহারের তথ্য শেয়ার করে এই অ্যাপটি উন্নত করতে সাহায্য করুন';
 
   @override
   String get days7 => '৭ দিন';

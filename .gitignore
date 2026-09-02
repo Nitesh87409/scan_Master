@@ -1,0 +1,20 @@
+﻿# Keystores & sensitive files
+*.keystore
+*.jks
+*keystore*.txt
+*.env
+
+# Local scratch / config dumps
+*.ps1
+*remote_config*.json
+rc_config.json
+current_remote_config.json
+
+# Flutter / Dart / Gradle build artifacts
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool/
+.pub/
+.pub-cache/
+**/android/build/
+**/build/

@@ -16,7 +16,7 @@ class NotificationService {
     );
 
     await _notificationsPlugin.initialize(
-      settings: initializationSettings,
+      initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
         if (response.payload != null && response.payload!.isNotEmpty) {
           final String path = response.payload!;
@@ -57,10 +57,10 @@ class NotificationService {
     );
 
     await _notificationsPlugin.show(
-      id: id,
-      title: title,
-      body: body,
-      notificationDetails: notificationDetails,
+      id,
+      title,
+      body,
+      notificationDetails,
       payload: payload,
     );
   }

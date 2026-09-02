@@ -296,7 +296,7 @@ class _FolderViewScreenState extends State<FolderViewScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: BannerAdWidget(isEnabled: AppConfig.adsFolderViewScreenEnabled),
+      // bottomNavigationBar: BannerAdWidget removed
     );
   }
 }

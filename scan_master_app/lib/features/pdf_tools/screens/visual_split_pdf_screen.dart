@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:pdf_manipulator/pdf_manipulator.dart';
-import 'package:pdf_manipulator/io.dart';
 
 class VisualSplitPdfScreen extends StatefulWidget {
   final File file;
@@ -101,36 +100,46 @@ class _VisualSplitPdfScreenState extends State<VisualSplitPdfScreen> {
     final List<String> createdPaths = [];
 
     try {
-      final pdf = Pdf();
       final outputDir = await getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final sourceBytes = await widget.file.readAsBytes();
       final totalPages = _document!.pages.length;
 
       // Sorted split points + the last page index, so we always close out the final part
       final sortedPoints = _splitPoints.toList()..sort();
       final boundaries = [...sortedPoints, totalPages - 1];
 
-      int startPage = 0;
-      int partNumber = 1;
+      List<String> pageRanges = [];
+      int startPage = 1; // 1-indexed
 
       for (final splitAfter in boundaries) {
-        final source = MemorySource(sourceBytes); // fresh source per part
-        final path = '${outputDir.path}/scan_split${partNumber}_$timestamp.pdf';
-        final sink = await FileSink.create(File(path));
-
-        final pageCount = splitAfter - startPage + 1;
-        final pages = List.generate(pageCount, (i) => startPage + i);
-
-        await pdf.extractPages(source, sink, pages: pages);
-        await sink.close();
-
-        createdPaths.add(path);
-        startPage = splitAfter + 1;
-        partNumber++;
+        final endPage = splitAfter + 1; // 1-indexed
+        if (startPage == endPage) {
+           pageRanges.add("$startPage");
+        } else {
+           pageRanges.add("$startPage-$endPage");
+        }
+        startPage = endPage + 1;
       }
 
-      await pdf.dispose();
+      final resultPaths = await PdfManipulator().splitPDF(
+        params: PDFSplitterParams(
+          pdfPath: widget.file.path,
+          pageRanges: pageRanges,
+        ),
+      );
+
+      if (resultPaths != null && resultPaths.isNotEmpty) {
+        for (int i = 0; i < resultPaths.length; i++) {
+          final resultFile = File(resultPaths[i]);
+          final path = '${outputDir.path}/scan_split${i + 1}_$timestamp.pdf';
+          if (await resultFile.exists()) {
+             await resultFile.copy(path);
+             createdPaths.add(path);
+          }
+        }
+      } else {
+        throw Exception("Failed to split PDF");
+      }
 
       if (mounted) Navigator.pop(context, true);
     } catch (e) {

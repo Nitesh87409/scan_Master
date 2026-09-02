@@ -34,11 +34,10 @@ class AppConfig {
 
   // ── Feature Flags ──
   static bool get adsEnabled => _rc.getBool('ads_enabled');
+  static String get discoverAppsUrl => _rc.getString('discover_apps_url');
   static bool get adsHomeScreenEnabled => _rc.getBool('ads_home_screen_enabled');
-  static bool get adsPdfToolsScreenEnabled => _rc.getBool('ads_pdf_tools_screen_enabled');
-  static bool get adsViewerScreenEnabled => _rc.getBool('ads_viewer_screen_enabled');
-  static bool get adsSettingsScreenEnabled => _rc.getBool('ads_settings_screen_enabled');
-  static bool get adsFolderViewScreenEnabled => _rc.getBool('ads_folder_view_screen_enabled');
+  static bool get adsHomeNativeEnabled => _rc.getBool('ads_home_native_enabled');
+  static bool get adsProtectInterstitialEnabled => _rc.getBool('ads_protect_interstitial_enabled');
   static bool get analyticsEnabled => _rc.getBool('analytics_enabled');
   static bool get ocrFeatureEnabled => _rc.getBool('ocr_feature_enabled');
   static bool get qrFeatureEnabled => _rc.getBool('qr_feature_enabled');
@@ -58,10 +57,10 @@ class AppConfig {
   static String get maintenanceMessage => _rc.getString('maintenance_message');
 
   // ── AdMob IDs ──
-  static String get admobBannerAndroid => _rc.getString('admob_banner_android');
-  static String get admobBannerIos => _rc.getString('admob_banner_ios');
-  static String get admobInterstitialAndroid => _rc.getString('admob_interstitial_android');
-  static String get admobInterstitialIos => _rc.getString('admob_interstitial_ios');
+  static String get admobProtectInterstitialAndroid => _rc.getString('admob_protect_interstitial_android');
+  static String get admobProtectInterstitialIos => _rc.getString('admob_protect_interstitial_ios');
+  static String get admobNativeAndroid => _rc.getString('admob_native_android');
+  static String get admobNativeIos => _rc.getString('admob_native_ios');
 
   // ── Store Links ──
   static String get playStoreUrl => _rc.getString('play_store_url');
@@ -111,10 +110,8 @@ class AppConfig {
         // Feature Flags
         'ads_enabled': true,
         'ads_home_screen_enabled': true,
-        'ads_pdf_tools_screen_enabled': true,
-        'ads_viewer_screen_enabled': true,
-        'ads_settings_screen_enabled': true,
-        'ads_folder_view_screen_enabled': true,
+        'ads_home_native_enabled': true,
+        'ads_protect_interstitial_enabled': true,
         'analytics_enabled': true,
         'ocr_feature_enabled': true,
         'qr_feature_enabled': true,
@@ -134,16 +131,17 @@ class AppConfig {
         'maintenance_message': 'App is under maintenance. Please try again later.',
 
         // AdMob IDs (Test IDs)
-        'admob_banner_android': 'ca-app-pub-3940256099942544/6300978111',
-        'admob_banner_ios': 'ca-app-pub-3940256099942544/2934735716',
-        'admob_interstitial_android': 'ca-app-pub-3940256099942544/1033173712',
-        'admob_interstitial_ios': 'ca-app-pub-3940256099942544/4411468910',
+        'admob_protect_interstitial_android': 'ca-app-pub-3940256099942544/1033173712',
+        'admob_protect_interstitial_ios': 'ca-app-pub-7632721706853296/7783729001',
+        'admob_native_android': 'ca-app-pub-3940256099942544/2247696110',
+        'admob_native_ios': 'ca-app-pub-7632721706853296/3203309990',
 
         // Store Links
         'play_store_url': 'https://play.google.com/store/apps/details?id=$_defaultAppPackageName',
         'amazon_store_url': 'https://www.amazon.com/gp/mas/dl/android?p=$_defaultAppPackageName',
         'play_store_developer_page': 'https://play.google.com/store/apps/developer?id=$_defaultDeveloperName',
         'amazon_developer_page': 'https://www.amazon.com/s?rh=p_4:$_defaultDeveloperName',
+        'discover_apps_url': 'https://play.google.com/store/search?q=pub:NITESH%20CODES&c=apps',
 
         // Update System
         'latest_app_version': '1.0.0',

@@ -147,5 +147,12 @@
   "quickActionOcr": "OCR টেক্সট",
   "quickActionOcrDesc": "টেক্সট এক্সট্রাক্ট",
   "quickActionPdfTools": "পিডিএফ সরঞ্জাম",
-  "quickActionPdfToolsDesc": "যুক্ত ও বিভক্ত"
+  "quickActionPdfToolsDesc": "যুক্ত ও বিভক্ত",
+  "exportTextTitle": "টেক্সট এক্সপোর্ট",
+  "descExportText": "পিডিএফ থেকে টেক্সট বের করুন",
+  "watermarkPdfTitle": "ওয়াটারমার্ক পিডিএফ",
+  "descWatermarkPdf": "পিডিএফে ওয়াটারমার্ক যোগ করুন",
+  "msgFolderEmpty": "এই ফোল্ডারটি খালি।",
+  "btnShareFolder": "ফোল্ডার শেয়ার করুন",
+  "processingBackground": "ব্যাকগ্রাউন্ডে প্রক্রিয়া করা হচ্ছে..."
 }

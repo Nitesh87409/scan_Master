@@ -1,6 +1,75 @@
 # Scan Master Brain & Changelog
 
-Ye file project ka detailed record rakhti hai. Har update, state change, aur event attachment yahan detail me log hoga.
+## [Unreleased] - 2026-09-01
+### Feature Update: PDF Viewer Text Search
+- **Feature:** Added an in-document text search feature to the built-in PDF Viewer (`viewer_screen.dart`).
+- **Details:** Integrated `PdfTextSearcher` and `PdfViewerTextSearchOverlay` from the `pdfrx` package. Added a seamless search UI in the AppBar that expands into a TextField when the search icon is tapped, including Next/Previous navigation buttons, without altering any existing UI structures.
+
+### Bug Fix: External App Task Hijacking
+- **Fix:** Changed `android:launchMode` from `singleTop` to `singleTask` in `AndroidManifest.xml`.
+- **Details:** Solved an issue where opening a PDF from an external app (like WhatsApp) caused the Scan Master PDF Viewer to open inside the external app's task stack. Using `singleTask` ensures the app always launches in its own separate window, preventing the external app from being "hijacked" when returning to it via recent apps.
+
+### Maintenance Update: Clean Up Unused Ads
+- **Refactor:** Completely removed all unused Banner Ad (`BannerAdWidget`) and generic Interstitial Ad integrations from the app codebase (`home_screen.dart`, `pdf_tools_screen.dart`, `viewer_screen.dart`, `settings_screen.dart`, `folder_view_screen.dart`).
+- **Details:** Cleaned up `AdService` to only retain the new Protect PDF Interstitial Ad logic. Removed old `admob_banner_*` and `admob_interstitial_*` parameters from `AppConfig` and `current_remote_config.json`, and successfully deployed the clean configuration to Firebase.
+
+### Feature Update: Protect PDF Interstitial Ad
+- **Fix/Feature:** Added an Interstitial Ad that triggers when the user clicks "Encrypt" in the Protect PDF feature.
+- **Details:** Updated `AdService` to support loading and showing `admob_protect_interstitial_android` with a callback. Wrapped the `_protectPdf` logic in `pdf_tools_screen.dart` so that the encryption process and success notification run smoothly right after the ad is closed (or immediately if ad fails to load). Updated `AppConfig` and pushed new parameters to Firebase Remote Config using the Firebase CLI.
+
+### Feature Update: Native Ad Integration
+- **Fix/Feature:** Replaced the empty 6th slot on the Home Screen grid with a Native Ad.
+- **Details:** Created a new `NativeAdCardWidget` that uses `NativeTemplateStyle` (small template) to blend with the existing UI (gradient background, rounded corners). Configured the `AndroidManifest.xml` and `AppConfig` with the real AdMob App ID and Native Ad Unit ID provided by the user.
+
+### UI Bug Fix: Dynamic Bottom Navigation
+- **Fix:** Fixed an issue where the center Floating Action Button on the Home Screen was overlapping with the Android system navigation bar.
+- **Details:** Updated `home_screen.dart` to use `MediaQuery.of(context).padding.bottom` to dynamically adjust the height and padding of the `BottomAppBar` and the `_FixedCenterDockedFabLocation`. This ensures the UI adapts seamlessly to both gesture navigation and 3-button navigation.
+
+## [1.5.44+167] - 2026-08-26
+### Feature Updates & Code Cleanup
+- **UI Update:** Rearranged the Home Screen grid. Moved "PDF Tools" to the first position, swapping places with "Signature".
+- **Cleanup:** Completely removed the `TesterReminderService` (which was used during closed testing) from the codebase and removed its initialization from `main.dart`.
+- **Cleanup:** Removed "Terms of Service" UI and completely disabled the Analytics toggle in Settings, permanently enabling Analytics under the hood without exposing the toggle to users.
+- **Rule Compliance:** Ensured AGENTS.md rules are followed (version bump, brain.md update).
+## [1.5.43+166] - 2026-08-25
+### Feature Update: Google Play Console API Integration
+- **Action Taken:** Assisted the user in setting up a Google Cloud Project without organization policies to generate a Service Account JSON key.
+- **Workflow Update:** Added the `PLAY_STORE_JSON_KEY` to GitHub Secrets and linked the service account to the Google Play Console for automated deployments.
+- **Impact:** Complete automation of the CI/CD pipeline! GitHub Actions can now directly push signed App Bundles to the Google Play Store via Fastlane without any manual intervention.
+- **Rule Compliance:** Ensured AGENTS.md rules are followed (version bump, brain.md update).
+## [1.5.42+165] - 2026-08-25
+### Feature Update: GitHub Actions CI/CD Pipeline Completion
+- **Action Taken:** Updated the `.github/workflows/deploy_play_store.yml` workflow file.
+- **Workflow Update:** Added a new `Setup Keystore` step that decodes `KEYSTORE_BASE64` secret back into a `.jks` file and dynamically generates `key.properties` from GitHub Secrets (`KEYSTORE_PASSWORD`, `KEY_ALIAS`).
+- **Impact:** The CI/CD pipeline is now fully capable of signing the release build on cloud servers automatically, allowing seamless deployment to the Play Store via Fastlane.
+- **Rule Compliance:** Ensured AGENTS.md rules are followed (version bump, brain.md update).
+
+## [1.5.41+164] - 2026-08-25
+### Feature Update: Release Keystore (App Signing) Setup
+- **Action Taken:** Generated a release keystore (`upload-keystore.jks`) using Java `keytool` and securely stored its credentials in `android/key.properties`.
+- **Gradle Update:** Modified `android/app/build.gradle.kts` to dynamically read from `key.properties` and apply the release signing configuration to the `release` build type instead of using the default `debug` key.
+- **Impact:** The app can now be built as a production-ready App Bundle (`.aab`) with a valid digital signature, which is a mandatory requirement for uploading to the Google Play Store.
+
+## [1.5.40+163] - 2026-08-25
+### Bug Fix (Critical): Remote Config Caching Issue for Ads
+- **Fix Applied:** Modified `AppConfig.initialize()` in `app_config.dart`. Set `minimumFetchInterval` to `Duration.zero` during `kDebugMode` instead of `1 hour`. 
+- **Impact:** Ensures that toggling ads off in the Firebase Remote Config console reflects instantly on the app during testing/development without having to wait for an hour for the cache to expire.
+- **Rule Compliance:** Ensured AGENTS.md rules are followed (version bump, brain.md update, clean install process).
+
+## [1.5.39+162] - 2026-07-10
+### Full Codebase Audit: Memory Leaks, Security, Performance & UI Fixes
+- **Memory Leak Fix (ad_service.dart):** Added `mounted` check in `BannerAdWidget.onAdLoaded` callback to prevent `setState() after dispose()` crash when user navigates away before ad loads.
+- **UI Fix (ad_service.dart):** Replaced empty 50px `SizedBox` placeholder with `SizedBox.shrink()` so no blank gap appears at bottom of screens when ads are loading.
+- **Security Fix (file_thumbnail.dart):** Rewrote `_isPdfEncrypted()` with proper `try/finally` to ensure `RandomAccessFile.close()` always runs, preventing native file descriptor leaks.
+- **Security Fix (vault_screen.dart):** Removed `FileOptionsHelper.showFileOptions()` from vault items (which exposed Share/Open-With, bypassing vault security). Vault taps now only open `ViewerScreen` for secure viewing.
+- **Performance Fix (file_manager_service.dart):** Replaced ALL blocking `listSync()` and `statSync()` calls (in `getFolders`, `renameFile`, `createFolder`, `renameFolder`, `emptyTrash`, `cleanupTrash`) with async equivalents (`list().toList()`, `stat()`). Prevents UI thread jank.
+- **Performance Fix (viewer_screen.dart):** Converted `_checkIfPdf()` from synchronous (`openSync`/`readSync`) to fully async (`open`/`read`) to prevent UI freezing on large files.
+- **Performance Fix (trash_screen.dart):** Replaced blocking `statSync()` with async `await file.stat()` in `_loadTrash()`.
+- **Consistency Fix (folder_view_screen.dart + app_config.dart):** Added `ads_folder_view_screen_enabled` Remote Config parameter and passed it to `BannerAdWidget` for consistency with all other screens.
+- **Bug Fix (folders_screen.dart):** Added `mounted` check before `setState` in `_loadPreferences()` to prevent crash on fast navigation.
+- **Security Fix (Multiple files):** Replaced all `print()` statements with `debugPrint()` across `file_manager_service.dart`, `ad_service.dart`, `auth_service.dart` to prevent debug info leaking in production builds.
+- **Rule Compliance:** Ensured AGENTS.md rules are followed (version bump, brain.md update, flutter clean before install).
+- **Version Bump:** `pubspec.yaml` updated to 1.5.39+162.
 
 ## [1.5.38+161] - 2026-07-10
 ### Feature Update: Configurable Banner Ads
@@ -1004,3 +1073,11 @@ Ye file project ka detailed record rakhti hai. Har update, state change, aur eve
 - Generated all required icon sizes for Android and iOS using flutter_launcher_icons.
 
 - [10 Jul 2026] Updated app logo with new neon glowing design, dynamically resized to maximum safe zone without crop, bumped version to 1.5.35+158 and installed APK on mobile.
+
+## Update on 01 Sep 2026
+- Cleaned up unused Ads.
+- Set `singleTask` launchMode for intent window segregation.
+- Added `PdfTextSearcher` to the PDF viewer.
+- Updated Firebase Remote Config for `discover_apps_url`.
+- Updated `SettingsScreen` to use `AppConfig.discoverAppsUrl` for the developer apps link and successfully removed banner ad widget.
+- Bumped version to 1.5.46+169 and preparing clean install for mobile testing.

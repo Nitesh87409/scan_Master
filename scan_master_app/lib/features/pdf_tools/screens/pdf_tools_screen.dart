@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf_manipulator/pdf_manipulator.dart';
-import 'package:pdf_manipulator/io.dart';
 import 'package:printing/printing.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:archive/archive_io.dart';
@@ -192,15 +191,19 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     final mergedFilePath = '${outputDir.path}/scan_merged_$timestamp.pdf';
     
     try {
-      final pdf = Pdf();
-      final outSink = await FileSink.create(File(mergedFilePath));
-      
-      await pdf.merge([
-        FileSource(_selectedFile!),
-        FileSource(_mergeFile2!),
-      ], outSink);
-      await pdf.dispose();
-      await outSink.close();
+      final resultPath = await PdfManipulator().mergePDFs(
+        params: PDFMergerParams(
+          pdfsPaths: [_selectedFile!.path, _mergeFile2!.path],
+        ),
+      );
+      if (resultPath != null) {
+        final resultFile = File(resultPath);
+        if (await resultFile.exists()) {
+          await resultFile.copy(mergedFilePath);
+        }
+      } else {
+        throw Exception("Failed to merge PDFs");
+      }
       
       if (_isCancelled) {
         try {
@@ -456,17 +459,20 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
           // If image-render approach fails, try fallback quality-only for first step
           if (step == compressionLadder.first) {
             try {
-              final pdf = Pdf();
-              final outSink = await FileSink.create(File(attemptPath));
-              try {
-                await pdf.compress(
-                  FileSource(_selectedFile!),
-                  outSink,
+              final resultPath = await PdfManipulator().pdfCompressor(
+                params: PDFCompressorParams(
+                  pdfPath: _selectedFile!.path,
                   imageQuality: quality,
-                );
-              } finally {
-                await outSink.close();
-                await pdf.dispose();
+                  imageScale: 1.0,
+                ),
+              );
+              if (resultPath != null) {
+                final resultFile = File(resultPath);
+                if (await resultFile.exists()) {
+                  await resultFile.copy(attemptPath);
+                }
+              } else {
+                throw Exception("Failed to compress PDF");
               }
             } catch (_) {
               continue;
@@ -829,42 +835,68 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
     passwordController.dispose();
 
     if (password == null || password.isEmpty) return;
-
-    setState(() {
-      _isCancelled = false;
-      _isProcessing = true;
-      _progressMessage = 'Applying AES Encryption...';
-    });
-    _startSimulatedProgress();
-
-    final outputDir = await getApplicationDocumentsDirectory();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final protectedFilePath = '${outputDir.path}/scan_protected_$timestamp.pdf';
     
-    try {
-      final pdf = Pdf();
-      final outSink = await FileSink.create(File(protectedFilePath));
+    final fileToProcess = _selectedFile;
+    if (fileToProcess == null) return;
+
+    // Delay to allow the dialog pop animation to finish completely.
+    // Showing an AdMob interstitial Activity during a Flutter route transition can cause crashes.
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    final completer = Completer<void>();
+
+    final startEncryption = () async {
+      setState(() {
+        _isCancelled = false;
+        _isProcessing = true;
+        _progressMessage = 'Applying AES Encryption...';
+      });
+      _startSimulatedProgress();
+
+      final outputDir = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final protectedFilePath = '${outputDir.path}/scan_protected_$timestamp.pdf';
       
-      await pdf.encrypt(
-         FileSource(_selectedFile!), 
-         outSink, 
-         encryption: PdfEncryptionConfig(ownerPassword: password, userPassword: password),
-      );
-      await pdf.dispose();
-      await outSink.close();
-      
-      if (_isCancelled) {
-        try {
-          if (await File(protectedFilePath).exists()) await File(protectedFilePath).delete();
-        } catch (_) {}
-        return;
+      try {
+        final resultPath = await PdfManipulator().pdfEncryption(
+          params: PDFEncryptionParams(
+            pdfPath: fileToProcess.path,
+            ownerPassword: password,
+            userPassword: password,
+            encryptionAES256: true,
+            encryptionAES128: false,
+            standardEncryptionAES128: false,
+            standardEncryptionAES40: false,
+          ),
+        );
+        
+        if (resultPath != null) {
+          final resultFile = File(resultPath);
+          if (await resultFile.exists()) {
+            await resultFile.copy(protectedFilePath);
+          }
+        } else {
+          throw Exception("Failed to encrypt PDF");
+        }
+        
+        if (_isCancelled) {
+          try {
+            if (await File(protectedFilePath).exists()) await File(protectedFilePath).delete();
+          } catch (_) {}
+          return;
+        }
+        
+        _finishTask(AppLocalizations.of(context)!.protectSuccess, filePath: protectedFilePath);
+      } catch (e, stack) {
+        FirebaseCrashlytics.instance.recordError(e, stack, fatal: false, reason: 'Protect PDF failed');
+        _finishTask(AppLocalizations.of(context)!.protectSuccess, error: e.toString());
+      } finally {
+        if (!completer.isCompleted) completer.complete();
       }
-      
-      _finishTask(AppLocalizations.of(context)!.protectSuccess, filePath: protectedFilePath);
-    } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack, fatal: false, reason: 'Protect PDF failed');
-      _finishTask(AppLocalizations.of(context)!.protectSuccess, error: e.toString());
-    }
+    };
+
+    AdService.showProtectInterstitialAd(onAdClosed: startEncryption);
+    await completer.future;
   }
 
   @override
@@ -966,7 +998,9 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
                               await _pickFile(isFile2: false);
                               if (_selectedFile != null) {
                                 await _protectPdf();
-                                if (mounted) setState(() => _selectedFile = null);
+                                if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+                                  setState(() => _selectedFile = null);
+                                }
                               }
                             },
                             icon: Icon(Icons.file_upload),
@@ -1103,7 +1137,6 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
                   ),
                 ),
               ),
-              BannerAdWidget(isEnabled: AppConfig.adsPdfToolsScreenEnabled),
             ],
           ),
           if (_isProcessing)

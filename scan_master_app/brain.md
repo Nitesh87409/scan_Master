@@ -1,0 +1,31 @@
+# Brain Log
+
+## 2026-09-01
+- **Files Modified:** 
+  - `lib/features/viewer/screens/viewer_screen.dart`
+  - `lib/features/pdf_tools/screens/pdf_tools_screen.dart`
+  - `lib/features/pdf_tools/screens/organize_pages_screen.dart`
+  - `lib/features/pdf_tools/screens/visual_split_pdf_screen.dart`
+  - `lib/features/home/screens/home_screen.dart`
+  - `android/build.gradle.kts`
+  - `android/gradle.properties`
+  - `android/settings.gradle.kts`
+  - `pubspec.yaml`
+- **Changes Details:**
+  - Removed deprecated/missing API calls (`PdfViewerTextSearchOverlay`, `io.dart` import, `AdService.showInterstitialAd()`).
+  - Fixed syntax and mismatching parenthesis in `viewer_screen.dart` causing compilation error.
+  - Upgraded Android Gradle Plugin to 8.6.0.
+  - Force-set `kotlin.jvm.target.validation.mode=warning` in `gradle.properties` to fix strict JVM target mismatch between plugins (`camera_android_camerax` [11], `receive_sharing_intent` [1.8]) and app target [17].
+  - Bumped version in `pubspec.yaml` from `1.5.46+169` to `1.5.47+170`.
+  - Built and deployed APK to RMX3870 via ADB.
+  - Fixed FAB blinking issue on `HomeScreen` by overriding `operator ==` and `hashCode` in `_FixedCenterDockedFabLocation` so Scaffold doesn't re-trigger transitions on `setState`.
+  - Fixed issue in `file_manager_service.dart` where internal system folders (like `flutter`, `vault`) were incorrectly showing up in the user's Folders tab.
+  - Removed Material splash/highlight visual artifacts ("shadow boxes") from Bottom Navigation buttons (`InkWell`) and Filter `ChoiceChip`s (`Theme` override) for cleaner UI interactions.
+  - Removed Usage Analytics toggle from `SettingsScreen` and enforced analytics to be permanently ON as per user request.
+  - Removed "Terms of Service" `ListTile` from `SettingsScreen` as per user request.
+  - Bumped version in `pubspec.yaml` from `1.5.47+170` to `1.5.48+171` to `1.5.49+172`.
+  - Fixed `pdf_manipulator` assertion error by explicitly setting only `encryptionAES256` to true in `PDFEncryptionParams` (others to false).
+  - Fixed R8 Missing Class error (`org.slf4j.impl.StaticLoggerBinder`) in Release mode by adding `-dontwarn org.slf4j.**` to `proguard-rules.pro`.
+  - Removed "Go Premium" fallback from `NativeAdCardWidget`. Now if an ad fails to load, the entire box is completely hidden to avoid bad UX and strict compliance with the NO OVER-ENGINEERING rule.
+  - Ran `flutter build apk` and installed on device.
+- **Why:** To ensure all recent bug fixes (PDF crash, FAB blink, UI splash, folder filter, settings clean-up) are cleanly compiled into the new APK without any cache issues, following the user's explicit command and `AGENTS.md` rules.

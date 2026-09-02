@@ -63,8 +63,7 @@ import 'app_localizations_hi.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -72,8 +71,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -85,19 +83,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('bn'),
     Locale('en'),
-    Locale('hi'),
+    Locale('hi')
   ];
 
   /// No description provided for @appName.
@@ -199,7 +196,7 @@ abstract class AppLocalizations {
   /// No description provided for @btnShareFolder.
   ///
   /// In en, this message translates to:
-  /// **'Share Folder (ZIP)'**
+  /// **'Share Folder'**
   String get btnShareFolder;
 
   /// No description provided for @msgNoFolders.
@@ -217,7 +214,7 @@ abstract class AppLocalizations {
   /// No description provided for @msgFolderEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Folder is empty. Move client documents here.'**
+  /// **'This folder is empty.'**
   String get msgFolderEmpty;
 
   /// No description provided for @hintFolderName.
@@ -409,7 +406,7 @@ abstract class AppLocalizations {
   /// No description provided for @processingBackground.
   ///
   /// In en, this message translates to:
-  /// **'Processing large file in background.\nYou can safely go back; we will notify you when it\'s done.'**
+  /// **'Processing in background...'**
   String get processingBackground;
 
   /// No description provided for @loading.
@@ -655,25 +652,25 @@ abstract class AppLocalizations {
   /// No description provided for @exportTextTitle.
   ///
   /// In en, this message translates to:
-  /// **'Extract Text (TXT)'**
+  /// **'Export Text'**
   String get exportTextTitle;
 
   /// No description provided for @descExportText.
   ///
   /// In en, this message translates to:
-  /// **'Run OCR to extract all text from the PDF into a .txt file'**
+  /// **'Extract text from PDF'**
   String get descExportText;
 
   /// No description provided for @watermarkPdfTitle.
   ///
   /// In en, this message translates to:
-  /// **'Add Watermark'**
+  /// **'Watermark PDF'**
   String get watermarkPdfTitle;
 
   /// No description provided for @descWatermarkPdf.
   ///
   /// In en, this message translates to:
-  /// **'Overlay custom text on all pages of the PDF'**
+  /// **'Add watermark to PDF'**
   String get descWatermarkPdf;
 
   /// No description provided for @settingsTitle.
@@ -947,8 +944,7 @@ abstract class AppLocalizations {
   String get quickActionPdfToolsDesc;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -957,28 +953,26 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['bn', 'en', 'hi'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['bn', 'en', 'hi'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'bn':
-      return AppLocalizationsBn();
-    case 'en':
-      return AppLocalizationsEn();
-    case 'hi':
-      return AppLocalizationsHi();
+    case 'bn': return AppLocalizationsBn();
+    case 'en': return AppLocalizationsEn();
+    case 'hi': return AppLocalizationsHi();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

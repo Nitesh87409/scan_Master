@@ -30,9 +30,16 @@ class _ViewerScreenState extends State<ViewerScreen> {
   int _totalPages = 0;
   int _currentPage = 0;
 
+  bool _isSearching = false;
+  late final PdfViewerController _pdfViewerController;
+  late final PdfTextSearcher _textSearcher;
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    _pdfViewerController = PdfViewerController();
+    _textSearcher = PdfTextSearcher(_pdfViewerController)..addListener(_updateState);
     _isPdf = widget.file.path.toLowerCase().endsWith('.pdf');
     _fileName = widget.file.path.split(Platform.pathSeparator).last;
     if (!_isPdf) {
@@ -137,23 +144,48 @@ class _ViewerScreenState extends State<ViewerScreen> {
     }
   }
 
+  void _updateState() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _textSearcher.removeListener(_updateState);
+    _textSearcher.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
         iconTheme: IconThemeData(color: Colors.white),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(_fileName, style: TextStyle(fontSize: 16, color: Colors.white)),
-            if (_isPdf && _totalPages > 0)
-              Text(
-                'Page ${_currentPage + 1} of $_totalPages',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: TextStyle(color: Colors.white, fontSize: 16),
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  hintStyle: TextStyle(color: Colors.white60),
+                  border: InputBorder.none,
+                ),
+                onChanged: (val) => _textSearcher.startTextSearch(val),
+                onSubmitted: (val) => _textSearcher.startTextSearch(val),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_fileName, style: TextStyle(fontSize: 16, color: Colors.white)),
+                  if (_isPdf && _totalPages > 0)
+                    Text(
+                      'Page ${_currentPage + 1} of $_totalPages',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                ],
               ),
-          ],
-        ),
         actions: _buildAppBarActions(),
       ),
       backgroundColor: Colors.black,
@@ -188,6 +220,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
                                 PdfViewer.file(
                                   widget.file.path,
                                   passwordProvider: () => _showPasswordDialog(),
+                                  controller: _pdfViewerController,
                                   params: PdfViewerParams(
                                     margin: 16.0,
                                     pageDropShadow: null,
@@ -278,14 +311,47 @@ class _ViewerScreenState extends State<ViewerScreen> {
                     ),
             ),
           ),
-          BannerAdWidget(isEnabled: AppConfig.adsViewerScreenEnabled),
+          // BannerAd removed
         ],
       ),
     );
   }
 
   List<Widget> _buildAppBarActions() {
+    if (_isSearching) {
+      return [
+        IconButton(
+          icon: Icon(Icons.keyboard_arrow_up, color: Colors.white),
+          onPressed: () => _textSearcher.goToPrevMatch(),
+        ),
+        IconButton(
+          icon: Icon(Icons.keyboard_arrow_down, color: Colors.white),
+          onPressed: () => _textSearcher.goToNextMatch(),
+        ),
+        IconButton(
+          icon: Icon(Icons.close, color: Colors.white),
+          onPressed: () {
+            setState(() {
+              _isSearching = false;
+              _searchController.clear();
+              _textSearcher.resetTextSearch();
+            });
+          },
+        ),
+      ];
+    }
+    
     return [
+      if (_isPdf)
+        IconButton(
+          icon: Icon(Icons.search, color: Colors.white),
+          tooltip: 'Search',
+          onPressed: () {
+            setState(() {
+              _isSearching = true;
+            });
+          },
+        ),
       if (_isPdf)
         IconButton(
           icon: Icon(Icons.grid_view, color: Colors.white),

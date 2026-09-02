@@ -147,5 +147,12 @@
   "quickActionOcr": "OCR टेक्स्ट",
   "quickActionOcrDesc": "टेक्स्ट निकालें",
   "quickActionPdfTools": "पीडीएफ टूल्स",
-  "quickActionPdfToolsDesc": "मर्ज और स्प्लिट"
+  "quickActionPdfToolsDesc": "मर्ज और स्प्लिट",
+  "exportTextTitle": "टेक्स्ट एक्सपोर्ट",
+  "descExportText": "पीडीएफ से टेक्स्ट निकालें",
+  "watermarkPdfTitle": "वॉटरमार्क पीडीएफ",
+  "descWatermarkPdf": "पीडीएफ में वॉटरमार्क जोड़ें",
+  "msgFolderEmpty": "यह फ़ोल्डर खाली है।",
+  "btnShareFolder": "फ़ोल्डर साझा करें",
+  "processingBackground": "बैकग्राउंड में प्रोसेस हो रहा है..."
 }

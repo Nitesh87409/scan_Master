@@ -22,3 +22,8 @@
 -keep class com.google.mlkit.** { *; }
 -keep class com.google.android.gms.** { *; }
 -keep class com.google.android.play.** { *; }
+
+# Fix R8 missing classes for SLF4J and iText (pdf_manipulator)
+-dontwarn org.slf4j.**
+-keep class com.itextpdf.** { *; }
+-dontwarn com.itextpdf.**
