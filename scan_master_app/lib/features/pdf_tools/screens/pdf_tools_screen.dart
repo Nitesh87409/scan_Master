@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -13,10 +12,6 @@ import 'package:archive/archive_io.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as sf;
 import 'package:image/image.dart' as img;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:scan_master_app/features/viewer/screens/viewer_screen.dart';
-import 'package:scan_master_app/widgets/file_thumbnail.dart';
-import 'package:scan_master_app/utils/file_options_helper.dart';
-import 'package:scan_master_app/utils/file_filter_util.dart';
 import 'package:scan_master_app/features/pdf_tools/screens/visual_split_pdf_screen.dart';
 import 'package:scan_master_app/core/animations.dart';
 import 'package:scan_master_app/main.dart'; // import for rootScaffoldMessengerKey
@@ -26,7 +21,6 @@ import 'package:scan_master_app/features/pdf_tools/widgets/pdf_file_cards.dart';
 import 'package:scan_master_app/features/pdf_tools/widgets/pdf_action_card.dart';
 import 'package:scan_master_app/features/pdf_tools/widgets/pdf_processing_overlay.dart';
 import 'package:scan_master_app/services/ad_service.dart';
-import 'package:scan_master_app/core/app_config.dart';
 
 
 enum CompressMode { low, medium, high, targetSize, targetPercent }
@@ -503,7 +497,9 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
         // For fixed presets, one pass is enough
         if (config.mode == CompressMode.low ||
             config.mode == CompressMode.medium ||
-            config.mode == CompressMode.high) break;
+            config.mode == CompressMode.high) {
+          break;
+        }
       }
 
       // Handle cancellation cleanup
@@ -845,7 +841,7 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
 
     final completer = Completer<void>();
 
-    final startEncryption = () async {
+    startEncryption() async {
       setState(() {
         _isCancelled = false;
         _isProcessing = true;
@@ -893,7 +889,7 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       } finally {
         if (!completer.isCompleted) completer.complete();
       }
-    };
+    }
 
     AdService.showProtectInterstitialAd(onAdClosed: startEncryption);
     await completer.future;

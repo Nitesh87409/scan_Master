@@ -24,8 +24,6 @@ class ScannerService {
       final documentScanner = DocumentScanner(options: options);
       final result = await documentScanner.scanDocument();
       
-      if (result == null) return [];
-      
       final outputDir = await getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       List<String> savedFiles = [];
@@ -36,19 +34,17 @@ class ScannerService {
       print('===================');
       
       // Save Images first so PDF appears at the top
-      if (result.images != null) {
-        for (int i = 0; i < result.images!.length; i++) {
-           try {
-             final imgFile = File(result.images![i]);
-             final newPath = '${outputDir.path}/scan_${timestamp}_$i.jpg';
-             await imgFile.copy(newPath);
-             savedFiles.add(newPath);
-           } catch(e) {
-             print('FAILED TO COPY JPG: $e');
-           }
-        }
+      for (int i = 0; i < result.images.length; i++) {
+         try {
+           final imgFile = File(result.images[i]);
+           final newPath = '${outputDir.path}/scan_${timestamp}_$i.jpg';
+           await imgFile.copy(newPath);
+           savedFiles.add(newPath);
+         } catch(e) {
+           print('FAILED TO COPY JPG: $e');
+         }
       }
-
+    
       // Save PDF last so it has the newest modified timestamp
       if (result.pdf != null) {
          try {
@@ -61,11 +57,11 @@ class ScannerService {
          } catch(e) {
            throw Exception('FAILED TO COPY PDF: $e. URI was: ${result.pdf!.uri}');
          }
-      } else if (result.images != null && result.images!.isNotEmpty) {
+      } else if (result.images.isNotEmpty) {
          // FALLBACK: ML Kit didn't return a PDF, generate it manually!
          try {
            final pdf = pw.Document();
-           for (final imgPath in result.images!) {
+           for (final imgPath in result.images) {
              final image = pw.MemoryImage(File(imgPath).readAsBytesSync());
              pdf.addPage(
                pw.Page(

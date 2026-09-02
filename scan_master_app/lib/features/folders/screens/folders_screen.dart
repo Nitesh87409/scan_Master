@@ -41,8 +41,9 @@ class _FoldersScreenState extends State<FoldersScreen> {
     if (!mounted) return;
     setState(() {
       final sizePref = prefs.getString('thumbnail_size') ?? 'Small';
-      if (sizePref == 'Small') _thumbnailSize = 50.0;
-      else if (sizePref == 'Large') _thumbnailSize = 120.0;
+      if (sizePref == 'Small') {
+        _thumbnailSize = 50.0;
+      } else if (sizePref == 'Large') _thumbnailSize = 120.0;
       else _thumbnailSize = 80.0;
     });
   }

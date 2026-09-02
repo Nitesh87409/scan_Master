@@ -2,13 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:scan_master_app/services/file_manager_service.dart';
 import 'package:scan_master_app/services/auth_service.dart';
-import 'package:scan_master_app/widgets/file_thumbnail.dart';
 import 'package:scan_master_app/features/viewer/screens/viewer_screen.dart';
 import 'package:path_provider/path_provider.dart';
 
 class VaultScreen extends StatefulWidget {
   final bool initialAuthPassed;
-  const VaultScreen({Key? key, this.initialAuthPassed = false}) : super(key: key);
+  const VaultScreen({super.key, this.initialAuthPassed = false});
 
   @override
   State<VaultScreen> createState() => _VaultScreenState();
@@ -48,7 +47,7 @@ class _VaultScreenState extends State<VaultScreen> {
     if (!_isAuthenticated) return;
     setState(() => _isLoading = true);
     final vaultDir = await _fileManager.getVaultFolder();
-    final rawFiles = vaultDir.listSync().where((f) => f is File).toList();
+    final rawFiles = vaultDir.listSync().whereType<File>().toList();
     
     final List<(FileSystemEntity, FileStat)> filesWithStats = [];
     for (final file in rawFiles) {

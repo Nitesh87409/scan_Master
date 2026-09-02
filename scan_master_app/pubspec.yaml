@@ -53,6 +53,8 @@ dependencies:
   firebase_messaging: any
   firebase_remote_config: any
   workmanager: any
+  local_auth_android: any
+  local_auth_darwin: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

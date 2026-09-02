@@ -9,8 +9,6 @@ import 'package:printing/printing.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:scan_master_app/features/pdf_tools/screens/organize_pages_screen.dart';
 import 'package:scan_master_app/l10n/app_localizations.dart';
-import 'package:scan_master_app/services/ad_service.dart';
-import 'package:scan_master_app/core/app_config.dart';
 
 class ViewerScreen extends StatefulWidget {
   final FileSystemEntity file;

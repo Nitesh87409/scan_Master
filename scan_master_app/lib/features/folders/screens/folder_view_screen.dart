@@ -1,21 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:pro_image_editor/pro_image_editor.dart';
-import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import 'package:archive/archive_io.dart';
-import 'package:scan_master_app/constants/document_filters.dart';
 import 'package:scan_master_app/utils/file_options_helper.dart';
 import 'package:scan_master_app/utils/file_filter_util.dart';
-import 'package:scan_master_app/core/app_config.dart';
 import 'package:scan_master_app/services/file_manager_service.dart';
-import 'package:scan_master_app/services/ad_service.dart';
 import 'package:scan_master_app/widgets/file_thumbnail.dart';
 import 'package:scan_master_app/core/animations.dart';
 import 'package:scan_master_app/features/viewer/screens/viewer_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:scan_master_app/features/pdf_tools/screens/pdf_tools_screen.dart';
 import 'package:scan_master_app/widgets/file_filter_bar.dart';
 import 'package:scan_master_app/l10n/app_localizations.dart';
 
@@ -48,8 +42,9 @@ class _FolderViewScreenState extends State<FolderViewScreen> {
     if (mounted) {
       setState(() {
         final sizePref = prefs.getString('thumbnail_size') ?? 'Small';
-        if (sizePref == 'Small') _thumbnailSize = 50.0;
-        else if (sizePref == 'Large') _thumbnailSize = 120.0;
+        if (sizePref == 'Small') {
+          _thumbnailSize = 50.0;
+        } else if (sizePref == 'Large') _thumbnailSize = 120.0;
         else _thumbnailSize = 80.0;
       });
     }

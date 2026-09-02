@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:scan_master_app/main.dart';
 import 'package:scan_master_app/l10n/app_localizations.dart';
 import 'package:scan_master_app/core/app_config.dart';
 import 'package:scan_master_app/core/analytics_events.dart';
-import 'package:scan_master_app/services/ad_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

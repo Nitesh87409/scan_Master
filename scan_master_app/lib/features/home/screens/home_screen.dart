@@ -1,22 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:open_filex/open_filex.dart';
-import 'package:gal/gal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'dart:async';
 import 'package:scan_master_app/features/vault/screens/vault_screen.dart';
-import 'package:scan_master_app/core/app_config.dart';
 import 'package:scan_master_app/services/auth_service.dart';
-import 'package:pro_image_editor/pro_image_editor.dart';
-import 'dart:typed_data';
-import 'package:scan_master_app/constants/document_filters.dart';
 import 'package:scan_master_app/services/scanner_service.dart';
 import 'package:scan_master_app/services/file_manager_service.dart';
-import 'package:scan_master_app/services/ad_service.dart';
 import 'package:scan_master_app/features/ocr/screens/ocr_screen.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:scan_master_app/features/viewer/screens/viewer_screen.dart';
 import 'package:scan_master_app/widgets/file_thumbnail.dart';
 import 'package:scan_master_app/utils/file_options_helper.dart';
@@ -84,8 +75,9 @@ class _HomeScreenState extends State<HomeScreen> {
     
     final prefs = await SharedPreferences.getInstance();
     final sizePref = prefs.getString('thumbnail_size') ?? 'Small';
-    if (sizePref == 'Small') _thumbnailSize = 50.0;
-    else if (sizePref == 'Large') _thumbnailSize = 120.0;
+    if (sizePref == 'Small') {
+      _thumbnailSize = 50.0;
+    } else if (sizePref == 'Large') _thumbnailSize = 120.0;
     else _thumbnailSize = 80.0;
 
     final newFiles = await _fileManager.getRecentFiles();
