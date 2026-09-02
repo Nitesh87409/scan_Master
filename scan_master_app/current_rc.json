@@ -1,0 +1,220 @@
+{
+  "parameters": {
+    "ads_home_screen_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "force_update_required": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "testing_reminder_enabled": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "ads_protect_interstitial_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "announcement_message": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "admob_protect_interstitial_ios": {
+      "defaultValue": {
+        "value": "ca-app-pub-7632721706853296/7783729001"
+      },
+      "valueType": "STRING"
+    },
+    "watermark_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "admob_protect_interstitial_android": {
+      "defaultValue": {
+        "value": "ca-app-pub-3940256099942544/1033173712"
+      },
+      "valueType": "STRING"
+    },
+    "admob_native_ios": {
+      "defaultValue": {
+        "value": "ca-app-pub-7632721706853296/3203309990"
+      },
+      "valueType": "STRING"
+    },
+    "show_announcement": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "analytics_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "compress_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "latest_app_version": {
+      "defaultValue": {
+        "value": "1.0.0"
+      },
+      "valueType": "STRING"
+    },
+    "ads_home_native_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "play_store_url": {
+      "defaultValue": {
+        "value": "https://play.google.com/store/apps/details?id=com.scanmaster.scan_master_app"
+      },
+      "valueType": "STRING"
+    },
+    "privacy_policy_url": {
+      "defaultValue": {
+        "value": "https://docs.google.com/document/d/1GhSOcrpymsv1XZvCXgzW1YQWlrrCpNiBy2dc2eBW8hU/edit?usp=sharing"
+      },
+      "valueType": "STRING"
+    },
+    "developer_name": {
+      "defaultValue": {
+        "value": "Nitesh"
+      },
+      "valueType": "STRING"
+    },
+    "ocr_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "amazon_developer_page": {
+      "defaultValue": {
+        "value": "https://www.amazon.com/s?rh=p_4:Nitesh"
+      },
+      "valueType": "STRING"
+    },
+    "amazon_store_url": {
+      "defaultValue": {
+        "value": "https://www.amazon.com/gp/mas/dl/android?p=com.scanmaster.scan_master_app"
+      },
+      "valueType": "STRING"
+    },
+    "play_store_developer_page": {
+      "defaultValue": {
+        "value": "https://play.google.com/store/apps/developer?id=Nitesh"
+      },
+      "valueType": "STRING"
+    },
+    "discover_apps_url": {
+      "defaultValue": {
+        "value": "https://play.google.com/store/search?q=pub:NITESH%20CODES&c=apps"
+      },
+      "valueType": "STRING"
+    },
+    "signature_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "qr_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "announcement_action_url": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "maintenance_message": {
+      "defaultValue": {
+        "value": "App is under maintenance. Please try again later."
+      },
+      "valueType": "STRING"
+    },
+    "protect_pdf_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "vault_feature_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "terms_of_service_url": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "export_text_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "export_images_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "announcement_title": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING"
+    },
+    "maintenance_mode": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    "admob_native_android": {
+      "defaultValue": {
+        "value": "ca-app-pub-3940256099942544/2247696110"
+      },
+      "valueType": "STRING"
+    },
+    "update_url": {
+      "defaultValue": {
+        "value": "https://play.google.com/store/apps/details?id=com.scanmaster.scan_master_app"
+      },
+      "valueType": "STRING"
+    }
+  }
+}

@@ -440,7 +440,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (!_adFailed)
                       Expanded(
                         child: NativeAdCardWidget(
-                          baseColor: Colors.pink,
+                          baseColor: Colors.white,
                           onFailed: () {
                             if (mounted) {
                               setState(() {

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:scan_master_app/core/app_config.dart';
+import 'package:scan_master_app/services/ad_service.dart';
 
 class NativeAdCardWidget extends StatefulWidget {
   final Color baseColor;
@@ -24,8 +25,11 @@ class _NativeAdCardWidgetState extends State<NativeAdCardWidget> {
     _loadAd();
   }
 
-  void _loadAd() {
+  Future<void> _loadAd() async {
     if (!AppConfig.adsEnabled || !AppConfig.adsHomeNativeEnabled) return;
+
+    await AdService.waitForInit;
+    if (!mounted) return;
 
     _nativeAd = NativeAd(
       adUnitId: Platform.isAndroid ? AppConfig.admobNativeAndroid : AppConfig.admobNativeIos,
@@ -51,35 +55,7 @@ class _NativeAdCardWidgetState extends State<NativeAdCardWidget> {
           }
         },
       ),
-      nativeTemplateStyle: NativeTemplateStyle(
-        templateType: TemplateType.small,
-        mainBackgroundColor: widget.baseColor.withOpacity(0.9),
-        cornerRadius: 20.0,
-        callToActionTextStyle: NativeTemplateTextStyle(
-          textColor: Colors.white,
-          backgroundColor: widget.baseColor.withOpacity(0.8),
-          style: NativeTemplateFontStyle.bold,
-          size: 14.0,
-        ),
-        primaryTextStyle: NativeTemplateTextStyle(
-          textColor: Colors.white,
-          backgroundColor: Colors.transparent,
-          style: NativeTemplateFontStyle.bold,
-          size: 14.0,
-        ),
-        secondaryTextStyle: NativeTemplateTextStyle(
-          textColor: Colors.white70,
-          backgroundColor: Colors.transparent,
-          style: NativeTemplateFontStyle.normal,
-          size: 11.0,
-        ),
-        tertiaryTextStyle: NativeTemplateTextStyle(
-          textColor: Colors.white70,
-          backgroundColor: Colors.transparent,
-          style: NativeTemplateFontStyle.normal,
-          size: 11.0,
-        ),
-      ),
+      factoryId: 'GridAdFactory',
     )..load();
   }
 
@@ -95,37 +71,29 @@ class _NativeAdCardWidgetState extends State<NativeAdCardWidget> {
       return const SizedBox();
     }
 
-    // Wrap the NativeAd in a container styled like the other cards
+    // Wrap the NativeAd in a container to add shadow matching other cards
     return Container(
       width: double.infinity,
-      // Fixed min height to match the approximate height of _buildActionCard
       height: 120,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [widget.baseColor.withOpacity(0.8), widget.baseColor],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: widget.baseColor.withOpacity(0.3),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
         ],
       ),
       child: _isLoaded && _nativeAd != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: AdWidget(ad: _nativeAd!),
-            )
+          ? AdWidget(ad: _nativeAd!)
           : Center(
               child: SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
-                  color: Colors.white.withAlpha(128),
+                  color: Colors.grey,
                   strokeWidth: 2,
                 ),
               ),

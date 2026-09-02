@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,12 +8,18 @@ import 'package:scan_master_app/core/app_config.dart';
 class AdService {
   static InterstitialAd? _protectInterstitialAd;
   static bool _isProtectInterstitialAdLoaded = false;
+  static final Completer<void> _initCompleter = Completer<void>();
 
+  static Future<void> get waitForInit => _initCompleter.future;
   static bool get adsEnabled => AppConfig.adsEnabled;
 
   static Future<void> initialize() async {
-    if (!adsEnabled) return;
+    if (!adsEnabled) {
+      if (!_initCompleter.isCompleted) _initCompleter.complete();
+      return;
+    }
     await MobileAds.instance.initialize();
+    if (!_initCompleter.isCompleted) _initCompleter.complete();
     _loadProtectInterstitialAd();
   }
 
