@@ -1,0 +1,3 @@
+D:/scan_master/native_scanner_poc/opencv/OpenCV-android-sdk/sdk/.cxx/Debug/4p4v5i6u/x86_64/CMakeFiles/opencv_jni_shared.dir
+D:/scan_master/native_scanner_poc/opencv/OpenCV-android-sdk/sdk/.cxx/Debug/4p4v5i6u/x86_64/CMakeFiles/edit_cache.dir
+D:/scan_master/native_scanner_poc/opencv/OpenCV-android-sdk/sdk/.cxx/Debug/4p4v5i6u/x86_64/CMakeFiles/rebuild_cache.dir

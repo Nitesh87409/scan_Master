@@ -1,0 +1,15 @@
+# ninja log v5
+1	4722	8100579193536966	CMakeFiles/native_processor.dir/native_processor.cpp.o	3eeeef12e361a752
+4737	5654	8100579202837934	D:/scan_master/native_scanner_poc/app/build/intermediates/cxx/Debug/6cp5g4g1/obj/armeabi-v7a/libnative_processor.so	15c98127dadb5c9
+3	2023	8100593566901959	CMakeFiles/native_processor.dir/native_processor.cpp.o	3eeeef12e361a752
+2023	2569	8100593572271080	D:/scan_master/native_scanner_poc/app/build/intermediates/cxx/Debug/6cp5g4g1/obj/armeabi-v7a/libnative_processor.so	15c98127dadb5c9
+6	2833	8100600228490165	CMakeFiles/native_processor.dir/native_processor.cpp.o	3eeeef12e361a752
+2833	3437	8100600234396627	D:/scan_master/native_scanner_poc/app/build/intermediates/cxx/Debug/6cp5g4g1/obj/armeabi-v7a/libnative_processor.so	15c98127dadb5c9
+4	2331	8100603040333817	CMakeFiles/native_processor.dir/native_processor.cpp.o	3eeeef12e361a752
+2332	2931	8100603046324983	D:/scan_master/native_scanner_poc/app/build/intermediates/cxx/Debug/6cp5g4g1/obj/armeabi-v7a/libnative_processor.so	15c98127dadb5c9
+4	1892	8100606756903396	CMakeFiles/native_processor.dir/native_processor.cpp.o	3eeeef12e361a752
+1892	2443	8100606762170422	D:/scan_master/native_scanner_poc/app/build/intermediates/cxx/Debug/6cp5g4g1/obj/armeabi-v7a/libnative_processor.so	15c98127dadb5c9
+7	2607	8100613234679422	CMakeFiles/native_processor.dir/native_processor.cpp.o	3eeeef12e361a752
+2607	3398	8100613242334465	D:/scan_master/native_scanner_poc/app/build/intermediates/cxx/Debug/6cp5g4g1/obj/armeabi-v7a/libnative_processor.so	15c98127dadb5c9
+8	2838	8100617233892108	CMakeFiles/native_processor.dir/native_processor.cpp.o	3eeeef12e361a752
+2839	3632	8100617241676034	D:/scan_master/native_scanner_poc/app/build/intermediates/cxx/Debug/6cp5g4g1/obj/armeabi-v7a/libnative_processor.so	15c98127dadb5c9
