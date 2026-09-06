@@ -745,7 +745,7 @@ class _FixedCenterDockedFabLocation extends FloatingActionButtonLocation {
   }
 
   @override
-  int get hashCode => bottomPadding.hashCode;
+  int get hashCode => runtimeType.hashCode;
 }
 
 
