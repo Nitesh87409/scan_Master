@@ -12,7 +12,7 @@ val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
     localProperties.load(FileInputStream(localPropertiesFile))
 }
-val admobAppId = localProperties.getProperty("flutter.admobAppId") ?: "ca-app-pub-3940256099942544~3347511713"
+val admobAppId = localProperties.getProperty("flutter.admobAppId") ?: "ca-app-pub-7632721706853296~9135967996"
 
 plugins {
     id("com.android.application")

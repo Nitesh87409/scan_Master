@@ -1,7 +1,0 @@
-[
-{
-  "directory": "D:/scan_master/native_scanner_poc/app/.cxx/Debug/6cp5g4g1/armeabi-v7a",
-  "command": "C:\\Users\\Offic\\AppData\\Local\\Android\\Sdk\\ndk\\26.1.10909125\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=armv7-none-linux-androideabi24 --sysroot=C:/Users/Offic/AppData/Local/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dnative_processor_EXPORTS -isystem D:/scan_master/native_scanner_poc/opencv/OpenCV-android-sdk/sdk/native/jni/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security  -std=c++17 -fno-limit-debug-info  -fPIC -o CMakeFiles\\native_processor.dir\\native_processor.cpp.o -c D:\\scan_master\\native_scanner_poc\\app\\src\\main\\cpp\\native_processor.cpp",
-  "file": "D:\\scan_master\\native_scanner_poc\\app\\src\\main\\cpp\\native_processor.cpp"
-}
-]

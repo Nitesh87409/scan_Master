@@ -131,9 +131,9 @@ class AppConfig {
         'maintenance_message': 'App is under maintenance. Please try again later.',
 
         // AdMob IDs (Test IDs)
-        'admob_protect_interstitial_android': 'ca-app-pub-3940256099942544/1033173712',
+        'admob_protect_interstitial_android': 'ca-app-pub-7632721706853296/7783729001',
         'admob_protect_interstitial_ios': 'ca-app-pub-7632721706853296/7783729001',
-        'admob_native_android': 'ca-app-pub-3940256099942544/2247696110',
+        'admob_native_android': 'ca-app-pub-7632721706853296/3203309990',
         'admob_native_ios': 'ca-app-pub-7632721706853296/3203309990',
 
         // Store Links

@@ -1,7 +1,0 @@
-[
-{
-  "directory": "D:/scan_master/native_scanner_poc/opencv/OpenCV-android-sdk/sdk/.cxx/Debug/4p4v5i6u/x86_64",
-  "command": "C:\\Users\\Offic\\AppData\\Local\\Android\\Sdk\\ndk\\26.1.10909125\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=x86_64-none-linux-android21 --sysroot=C:/Users/Offic/AppData/Local/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC -o CMakeFiles\\opencv_jni_shared.dir\\dummy.cpp.o -c D:\\scan_master\\native_scanner_poc\\opencv\\OpenCV-android-sdk\\sdk\\libcxx_helper\\dummy.cpp",
-  "file": "D:\\scan_master\\native_scanner_poc\\opencv\\OpenCV-android-sdk\\sdk\\libcxx_helper\\dummy.cpp"
-}
-]

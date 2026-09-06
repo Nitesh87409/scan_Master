@@ -1,1 +1,0 @@
-D:\scan_master\native_scanner_poc\opencv\OpenCV-android-sdk\sdk\build\intermediates\cxx\Debug\4p4v5i6u\obj\x86

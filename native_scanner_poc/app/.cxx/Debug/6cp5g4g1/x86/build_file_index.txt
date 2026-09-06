@@ -1,1 +1,0 @@
-D:\scan_master\native_scanner_poc\app\src\main\cpp\CMakeLists.txt

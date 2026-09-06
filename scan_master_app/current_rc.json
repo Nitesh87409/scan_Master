@@ -50,7 +50,7 @@
     },
     "admob_protect_interstitial_android": {
       "defaultValue": {
-        "value": "ca-app-pub-3940256099942544/1033173712"
+        "value": "ca-app-pub-7632721706853296/7783729001"
       },
       "valueType": "STRING"
     },
@@ -206,7 +206,7 @@
     },
     "admob_native_android": {
       "defaultValue": {
-        "value": "ca-app-pub-3940256099942544/2247696110"
+        "value": "ca-app-pub-7632721706853296/3203309990"
       },
       "valueType": "STRING"
     },

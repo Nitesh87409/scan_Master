@@ -1,1 +1,0 @@
-D:\scan_master\native_scanner_poc\app\build\intermediates\cxx\Debug\6cp5g4g1\obj\armeabi-v7a
