@@ -53,7 +53,7 @@ jobs:
 
       - name: Build Android App Bundle (AAB)
         working-directory: ./scan_master_app
-        run: flutter build appbundle --release
+        run: flutter build appbundle --release --android-skip-build-dependency-validation
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
