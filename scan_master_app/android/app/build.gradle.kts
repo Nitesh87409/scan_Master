@@ -28,7 +28,7 @@ plugins {
 android {
     namespace = "com.scanmaster.scan_master_app"
     compileSdk = 36
-    ndkVersion = "30.0.16138531"
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
