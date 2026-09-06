@@ -89,4 +89,9 @@ dependencies {
     implementation("com.google.mlkit:text-recognition-korean:16.0.1")
 }
 
-
+// Disable stripping for massive MLKit native libraries to prevent OOM / strip failures
+tasks.whenTaskAdded {
+    if (name.contains("strip", ignoreCase = true)) {
+        enabled = false
+    }
+}
