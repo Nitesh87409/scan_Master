@@ -57,9 +57,16 @@ jobs:
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
       - name: Setup Android NDK
+        id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r27c
+
+      - name: Link NDK to Android SDK path
+        run: |
+          mkdir -p $ANDROID_HOME/ndk
+          ln -sf "${{ steps.setup-ndk.outputs.ndk-path }}" "$ANDROID_HOME/ndk/27.0.12077973"
+          echo "NDK linked: $ANDROID_HOME/ndk/27.0.12077973 -> ${{ steps.setup-ndk.outputs.ndk-path }}"
 
       - name: Build Android App Bundle (AAB)
         working-directory: ./scan_master_app
