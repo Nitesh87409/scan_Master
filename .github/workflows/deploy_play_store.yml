@@ -1,6 +1,11 @@
 name: Play Store Auto-Deploy
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scan_master_app/**'
   workflow_dispatch:
     inputs:
       track:
@@ -21,10 +26,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -53,12 +58,12 @@ jobs:
 
       - name: Build Android App Bundle (AAB)
         working-directory: ./scan_master_app
-        run: flutter build appbundle --release --android-skip-build-dependency-validation
+        run: flutter build appbundle --release
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.0'
+          ruby-version: '3.2'
           bundler-cache: true
           working-directory: ./scan_master_app/android
 
@@ -66,7 +71,7 @@ jobs:
         working-directory: ./scan_master_app/android
         env:
           PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
-          PLAY_STORE_TRACK: ${{ inputs.track }}
+          PLAY_STORE_TRACK: ${{ inputs.track || 'production' }}
         run: |
           echo "$PLAY_STORE_JSON_KEY" > play_store_key.json
           export PLAY_STORE_JSON_KEY_PATH="play_store_key.json"
