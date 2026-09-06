@@ -29,13 +29,17 @@ jobs:
           channel: 'stable'
 
       - name: Get Flutter dependencies
+        working-directory: ./scan_master_app
         run: flutter pub get
 
       - name: Verify Formatting
+        working-directory: ./scan_master_app
         run: dart format --output=none --set-exit-if-changed .
 
       - name: Run Flutter Tests
+        working-directory: ./scan_master_app
         run: flutter test || echo "No tests found or tests failed, continuing for now..."
 
       - name: Build Basic APK
+        working-directory: ./scan_master_app
         run: flutter build apk --release

@@ -28,16 +28,18 @@ jobs:
           channel: 'stable'
 
       - name: Get Flutter dependencies
+        working-directory: ./scan_master_app
         run: flutter pub get
 
       - name: Build Split APKs
+        working-directory: ./scan_master_app
         run: flutter build apk --release --split-per-abi
 
       - name: Upload APKs as Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: release-apks
-          path: build/app/outputs/flutter-apk/*-release.apk
+          path: scan_master_app/build/app/outputs/flutter-apk/*-release.apk
 
       - name: Setup Node.js
         uses: actions/setup-node@v3

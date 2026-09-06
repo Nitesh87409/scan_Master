@@ -35,9 +35,11 @@ jobs:
           channel: 'stable'
 
       - name: Get Flutter dependencies
+        working-directory: ./scan_master_app
         run: flutter pub get
 
       - name: Setup Keystore
+        working-directory: ./scan_master_app
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -50,6 +52,7 @@ jobs:
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
       - name: Build Android App Bundle (AAB)
+        working-directory: ./scan_master_app
         run: flutter build appbundle --release
 
       - name: Setup Ruby
@@ -57,10 +60,10 @@ jobs:
         with:
           ruby-version: '3.0'
           bundler-cache: true
-          working-directory: ./android
+          working-directory: ./scan_master_app/android
 
       - name: Deploy to Play Store (Fastlane)
-        working-directory: ./android
+        working-directory: ./scan_master_app/android
         env:
           PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
           PLAY_STORE_TRACK: ${{ inputs.track }}
