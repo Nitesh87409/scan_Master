@@ -19,6 +19,9 @@ class AppTheme {
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
       elevatedButtonTheme: _buttonTheme,
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           TargetPlatform.android: PremiumPageTransitionsBuilder(),
@@ -44,6 +47,9 @@ class AppTheme {
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
       elevatedButtonTheme: _buttonTheme,
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           TargetPlatform.android: PremiumPageTransitionsBuilder(),

@@ -523,6 +523,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 if (mounted) messenger.hideCurrentSnackBar();
                               });
                             }
+                          }).catchError((e) {
+                            debugPrint('Delete error: $e');
                           });
                         },
                         child: Card(
