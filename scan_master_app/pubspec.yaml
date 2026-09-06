@@ -39,7 +39,7 @@ dependencies:
   pro_image_editor: any
   flutter_local_notifications: any
   pdf_manipulator: any
-  pdfrx: any
+  pdfrx: 2.6.1
   receive_sharing_intent: 1.8.0
   reorderable_grid_view: any
   quick_actions: any
