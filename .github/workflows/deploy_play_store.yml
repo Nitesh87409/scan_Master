@@ -37,7 +37,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.3'
           channel: 'stable'
 
       - name: Get Flutter dependencies
@@ -57,25 +56,21 @@ jobs:
           echo "keyAlias=$KEY_ALIAS" >> android/key.properties
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
-      - name: Android NDK Diagnostics + Install
+      - name: Free Disk Space & Accept Licenses
         run: |
-          echo "=== ANDROID_HOME: $ANDROID_HOME ==="
-          echo "=== Pre-installed NDKs: ===" && ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "none"
-          echo "=== Flutter version: ===" && flutter --version
-          echo "=== Installing NDK 27.0.12077973 via sdkmanager ==="
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" 2>&1 | tail -3
-          echo "=== NDKs after install: ===" && ls $ANDROID_HOME/ndk/ 2>/dev/null
-          echo "=== Strip binary exists: ===" && ls $ANDROID_HOME/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip 2>/dev/null || echo "NOT FOUND"
+          # Free up disk space on Ubuntu runner to prevent OOM/Disk Full during native build
+          sudo rm -rf /usr/share/dotnet /usr/share/swift /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force 2>/dev/null || true
+          # Accept licenses so AGP can automatically download the exact NDK version it needs
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build Android App Bundle (AAB)
         working-directory: ./scan_master_app
-        env:
-          ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/27.0.12077973
         run: |
           sed -i '/org.gradle.java.home/d' android/gradle.properties
           sed -i '/org.gradle.unsafe.watch-fs/d' android/gradle.properties
           echo "org.gradle.unsafe.watch-fs=false" >> android/gradle.properties
-          flutter build appbundle --release --split-debug-info=build/app/debug-info
+          flutter build appbundle --release --obfuscate --split-debug-info=build/app/debug-info
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
