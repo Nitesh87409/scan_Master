@@ -56,6 +56,10 @@ jobs:
           echo "keyAlias=$KEY_ALIAS" >> android/key.properties
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
+      - name: Install Android NDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973"
+
       - name: Build Android App Bundle (AAB)
         working-directory: ./scan_master_app
         run: flutter build appbundle --release
