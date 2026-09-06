@@ -36,7 +36,7 @@ jobs:
         run: flutter build apk --release --split-per-abi
 
       - name: Upload APKs as Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: release-apks
           path: scan_master_app/build/app/outputs/flutter-apk/*-release.apk
