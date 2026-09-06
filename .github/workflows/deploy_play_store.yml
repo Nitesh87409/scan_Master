@@ -56,24 +56,25 @@ jobs:
           echo "keyAlias=$KEY_ALIAS" >> android/key.properties
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
-      - name: Setup Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r27c
-
-      - name: Link NDK to Android SDK path
+      - name: Android NDK Diagnostics + Install
         run: |
-          mkdir -p $ANDROID_HOME/ndk
-          ln -sf "${{ steps.setup-ndk.outputs.ndk-path }}" "$ANDROID_HOME/ndk/27.0.12077973"
-          echo "NDK linked: $ANDROID_HOME/ndk/27.0.12077973 -> ${{ steps.setup-ndk.outputs.ndk-path }}"
+          echo "=== ANDROID_HOME: $ANDROID_HOME ==="
+          echo "=== Pre-installed NDKs: ===" && ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "none"
+          echo "=== Flutter version: ===" && flutter --version
+          echo "=== Installing NDK 27.0.12077973 via sdkmanager ==="
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" 2>&1 | tail -3
+          echo "=== NDKs after install: ===" && ls $ANDROID_HOME/ndk/ 2>/dev/null
+          echo "=== Strip binary exists: ===" && ls $ANDROID_HOME/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip 2>/dev/null || echo "NOT FOUND"
 
       - name: Build Android App Bundle (AAB)
         working-directory: ./scan_master_app
+        env:
+          ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/27.0.12077973
         run: |
-          # Permanent fix: remove any Windows-only java.home line that breaks CI
           sed -i '/org.gradle.java.home/d' android/gradle.properties
-          flutter build appbundle --release
+          sed -i '/org.gradle.unsafe.watch-fs/d' android/gradle.properties
+          echo "org.gradle.unsafe.watch-fs=false" >> android/gradle.properties
+          flutter build appbundle --release --split-debug-info=build/app/debug-info
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
