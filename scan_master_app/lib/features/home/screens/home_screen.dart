@@ -225,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: _GlowingScanButton(
         onPressed: () => _startScan(isGallery: false),
       ),
-      floatingActionButtonLocation: const _FixedCenterDockedFabLocation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         height: 58,
         padding: EdgeInsets.zero,
@@ -726,28 +726,4 @@ class _GlowingScanButtonState extends State<_GlowingScanButton> with SingleTicke
     );
   }
 }
-
-
-class _FixedCenterDockedFabLocation extends FloatingActionButtonLocation {
-  const _FixedCenterDockedFabLocation();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
-    final double fabY = scaffoldGeometry.scaffoldSize.height - 58.0 - (scaffoldGeometry.floatingActionButtonSize.height / 2.0) + 15.0; // 58 is bottom app bar height
-    return Offset(fabX, fabY);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is _FixedCenterDockedFabLocation;
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-}
-
-
-
 
