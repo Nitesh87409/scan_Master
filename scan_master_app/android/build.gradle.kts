@@ -34,6 +34,9 @@ tasks.register<Delete>("clean") {
 subprojects {
     project.pluginManager.withPlugin("com.android.library") {
         val android = project.extensions.getByName("android") as com.android.build.api.dsl.LibraryExtension
+        if (android.namespace == null) {
+            android.namespace = project.group.toString()
+        }
         android.compileSdk = 36
         android.compileOptions {
             sourceCompatibility = JavaVersion.VERSION_17
