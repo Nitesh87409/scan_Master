@@ -499,6 +499,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         onDismissed: (direction) {
                           final messenger = ScaffoldMessenger.of(context);
+                          final movedMsg = AppLocalizations.of(context)!.msgMovedToTrash;
+                          final undoLabel = AppLocalizations.of(context)!.actionUndo;
                           setState(() {
                             _recentFiles.removeWhere((f) => f.path == file.path);
                           });
@@ -508,10 +510,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               messenger.clearSnackBars();
                               messenger.showSnackBar(
                                 SnackBar(
-                                  content: Text(AppLocalizations.of(context)!.msgMovedToTrash),
+                                  content: Text(movedMsg),
                                   duration: const Duration(seconds: 2),
                                   action: SnackBarAction(
-                                    label: AppLocalizations.of(context)!.actionUndo,
+                                    label: undoLabel,
                                     onPressed: () async {
                                       await _fileManager.restoreFromTrash(trashPath);
                                       _loadFiles();
@@ -519,12 +521,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                               );
-                              Future.delayed(const Duration(seconds: 2), () {
-                                if (mounted) messenger.hideCurrentSnackBar();
-                              });
                             }
-                          }).catchError((e) {
-                            debugPrint('Delete error: $e');
                           });
                         },
                         child: Card(
