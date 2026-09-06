@@ -225,12 +225,10 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: _GlowingScanButton(
         onPressed: () => _startScan(isGallery: false),
       ),
-      floatingActionButtonLocation: _FixedCenterDockedFabLocation(
-        bottomPadding: MediaQuery.of(context).padding.bottom,
-      ),
+      floatingActionButtonLocation: const _FixedCenterDockedFabLocation(),
       bottomNavigationBar: BottomAppBar(
-        height: 58 + MediaQuery.of(context).padding.bottom,
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        height: 58,
+        padding: EdgeInsets.zero,
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         child: Row(
@@ -731,20 +729,19 @@ class _GlowingScanButtonState extends State<_GlowingScanButton> with SingleTicke
 
 
 class _FixedCenterDockedFabLocation extends FloatingActionButtonLocation {
-  final double bottomPadding;
-  const _FixedCenterDockedFabLocation({this.bottomPadding = 0.0});
+  const _FixedCenterDockedFabLocation();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
-    final double fabY = scaffoldGeometry.scaffoldSize.height - 58.0 - bottomPadding - (scaffoldGeometry.floatingActionButtonSize.height / 2.0) + 15.0; // 58 is bottom app bar height
+    final double fabY = scaffoldGeometry.scaffoldSize.height - 58.0 - (scaffoldGeometry.floatingActionButtonSize.height / 2.0) + 15.0; // 58 is bottom app bar height
     return Offset(fabX, fabY);
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is _FixedCenterDockedFabLocation && other.bottomPadding == bottomPadding;
+    return other is _FixedCenterDockedFabLocation;
   }
 
   @override
