@@ -63,7 +63,10 @@ jobs:
 
       - name: Build Android App Bundle (AAB)
         working-directory: ./scan_master_app
-        run: flutter build appbundle --release
+        run: |
+          # Permanent fix: remove any Windows-only java.home line that breaks CI
+          sed -i '/org.gradle.java.home/d' android/gradle.properties
+          flutter build appbundle --release
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
