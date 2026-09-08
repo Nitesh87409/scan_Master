@@ -2,7 +2,7 @@ name: scan_master_app
 description: "A premium Material 3 Document Scanner and PDF Toolkit app"
 publish_to: 'none'
 
-version: 1.5.54+186
+version: 1.5.55+187
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
